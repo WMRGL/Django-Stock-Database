@@ -4,13 +4,11 @@
 *.sqlite3
 *KEY.txt
 *email.json
-/static/
 __pycache__/
-migrations/
 *.docx
 *.png
 *.xlsx
 *.csv
 DB_BACKUPS/
-/stock/settings.py
+/stock/local_settings.py
 /stock_web/prime.py

@@ -12,24 +12,17 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import pdb
+import sys
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 try:
-    key_file=open(os.path.join(os.path.dirname(__file__),"KEY.txt"))
-    SECRET_KEY = key_file.read()
-except:
-    SECRET_KEY = ""
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+    from .local_settings import SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES, BASE_DIR
+except ImportError:
+    print('Check the following settings are present in local_settings.py:\n'
+          'SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES')
+    sys.exit()
 
-#Change to server address and name when hosting
-ALLOWED_HOSTS = ['127.0.0.1']
+
 
 SITE_URL="NOT CONFIGURED"
 
@@ -109,16 +102,6 @@ SESSION_EXPIRE_SECONDS = 1200
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 ###### OCCASIONALLY WILL NEED TO RUN
 ######"django-admin clearsessions" TO CLEAR OLD DATA###
-
-# Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'stock.sqlite3'),
-    }
-}
 
 
 
