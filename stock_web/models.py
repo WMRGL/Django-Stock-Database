@@ -58,6 +58,22 @@ def create_profile(sender, instance, created, **kwargs):
                     pass
 
 
+class Room(models.Model):
+    room_name = models.CharField(max_length=100, unique=True)
+    class Meta:
+        verbose_name_plural = "Rooms"
+
+    def __str__(self):
+        return self.room_name
+
+
+class Location(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    def __str__(self):
+        return self.name
+
+
+
 class Suppliers(models.Model):
     def __str__(self):
         return self.name
@@ -160,6 +176,7 @@ class Reagents(models.Model):
         null=True,
         verbose_name="Most Recent Kit Insert",
     )
+    kit_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Kit Name")
 
     @classmethod
     def create(cls, values):
@@ -581,6 +598,7 @@ class Insert(models.Model):
         return ins_id
 
 
+
 class Inventory(models.Model):
     def __str__(self):
         return "{}, Lot:{}, Stock Number:{}".format(
@@ -687,6 +705,9 @@ class Inventory(models.Model):
     accept_reason = models.CharField(
         max_length=150, blank=True, null=True, verbose_name="Acceptance Reason"
     )
+    room = models.ForeignKey(Room, on_delete=models.PROTECT, blank=True, null=True)
+    location = models.ForeignKey(Location, on_delete=models.PROTECT, blank=True, null=True)
+
 
     def days_remaining(self):
         return (self.date_exp - datetime.date.today()).days
@@ -1143,3 +1164,4 @@ class Comments(models.Model):
         blank=True,
         null=True,
     )
+

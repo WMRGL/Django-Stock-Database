@@ -33,6 +33,7 @@ from .models import (
     Emails,
     EmailGroup,
     Comments,
+    Room, Location
 )
 
 
@@ -471,3 +472,6 @@ class CustomUserAdmin(UserAdmin):
             "admin/stock_web/change_password.html",
             context,
         )
+
+admin.site.register(Room)
+admin.site.register(Location)

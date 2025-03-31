@@ -99,6 +99,8 @@ class NewInvForm(forms.ModelForm):
             "date_exp",
             "num_rec",
             "accept_reason",
+            "room",
+            "location"
         )
         widgets = {
             "supplier": Select2Widget,
@@ -109,7 +111,11 @@ class NewInvForm(forms.ModelForm):
             "reagent": forms.HiddenInput(),
             "vol_rec": forms.HiddenInput(),
             "current_vol": forms.HiddenInput(),
+            "room": Select2Widget,
+            "location": Select2Widget
+
         }
+
 
     def clean(self):
         super(NewInvForm, self).clean()
@@ -139,6 +145,8 @@ class NewInvForm(forms.ModelForm):
         self.fields["team"].queryset = Teams.objects.exclude(is_active=False).exclude(
             name="ALL"
         )
+        self.fields["room"].required = True
+        self.fields["location"].required = True
 
 
 class NewProbeForm(forms.ModelForm):
@@ -473,6 +481,9 @@ class UploadReagentsForm(forms.Form):
             "Default Team",
             "Minimum Stock Level",
             "Volume tracked",
+            "Manufacturers Info Required?",
+            "Room",
+            "Location"
         ]:
             self.add_error(
                 "file",
@@ -484,7 +495,7 @@ class UploadReagentsForm(forms.Form):
             for line in self.files["file"].readlines():
                 line = line.decode("utf-8").strip()
                 error = False
-                if len(line.split(",")) != 6:
+                if len(line.split(",")) != 7:
                     error = True
 
             if error == True:

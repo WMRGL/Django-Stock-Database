@@ -42,7 +42,7 @@ from .models import (
     VolUsage,
     Emails,
     EmailGroup,
-    Comments,
+    Comments, Location, Room,
 )
 from .forms import (
     LoginForm,
@@ -318,9 +318,9 @@ def _toolbar(httprequest, active=""):
             {"name": "Inventory Item", "url": reverse("stock_web:newinv", args=["_"])},
             {"name": "Supplier", "url": reverse("stock_web:newsup")},
             {"name": "Team", "url": reverse("stock_web:newteam")},
-            {"name": "Reagent", "url": reverse("stock_web:newreagent")},
+            {"name": "Product", "url": reverse("stock_web:newreagent")},
             {
-                "name": "Reagents - Bulk Upload",
+                "name": "Product - Bulk Upload",
                 "url": reverse("stock_web:uploadreagents"),
             },
             {"name": "Recipe", "url": reverse("stock_web:newrecipe")},
@@ -3537,6 +3537,8 @@ def uploadreagents(httprequest):
                             name=row["Default Supplier"]
                         )
                         values["team_def"] = Teams.objects.get(name=row["Default Team"])
+                        values["room"] = Room.objects.get(room_name=row["room"])
+                        values["location"] = Location.objects.get(name=row["location"])
                         values["min_count"] = row["Minimum Stock Level"]
                         values["track_vol"] = (
                             True if row["Volume tracked"] == 1 else False
@@ -3585,6 +3587,8 @@ def get_template(httprequest):
             "Minimum Stock Level",
             "Volume tracked",
             "Manufacturers Info Required?",
+            "Room",
+            "Location"
         ]
     )
 
