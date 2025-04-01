@@ -25,7 +25,7 @@
     <form enctype="multipart/form-data" action="{{ submiturl }}" method="post">
       {% csrf_token %}
       <fieldset><legend>{{ heading }}</legend>
-        <a href="/stock/get_template"> Click here to download a template for uploading reagents </a>
+        <a href="/stock/get_template"> Click here to download a template for uploading products </a>
           <table>
             {{ form }}
           </table>

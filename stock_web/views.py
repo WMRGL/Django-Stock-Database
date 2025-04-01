@@ -741,12 +741,12 @@ def insertdates(httprequest, date, stage):
             title += " that have a manufacturer’s instructions requiring confirmation"
         reagent_count = collections.Counter([x.reagent for x in items])
         headings = [
-            "Reagent Name",
+            "Product Name",
             "Catalogue Number",
             "Default Supplier",
             "Latest Insert Version",
             "Insert Last Checked",
-            "Number Recieved",
+            "Number Received",
         ]
         body = []
         for item, count in reagent_count.items():
@@ -936,7 +936,7 @@ def compsearch(httprequest):
 def listinv(httprequest):
     title = "List of Products"
     headings = [
-        "Reagent Name",
+        "Product Name",
         "Number Unopen (Or Volume) In Stock",
         "Number Open In Stock",
         "Minimum Stock Level",
@@ -1163,7 +1163,7 @@ def inventory(httprequest, search, what, sortby, page):
                 reverse("stock_web:inventory", args=[search, what, sortby, 1])
             )
     headings = [
-        "Reagent Name",
+        "Product Name",
         "Catalogue Number",
         "Supplier",
         "Stock Number",
@@ -1476,7 +1476,7 @@ def stockreport(httprequest, fin, filters, pk, extension):
     submiturl = reverse("stock_web:stockreport", args=[fin, filters, pk, extension])
     cancelurl = reverse("stock_web:listinv")
     toolbar = _toolbar(httprequest, active="Stock Reports")
-    header = "Select Reagent to Generate Stock Report For"
+    header = "Select Product to Generate Stock Report For"
     form = StockReportForm
     if pk == "_":
         if httprequest.method == "POST":
@@ -1860,7 +1860,7 @@ def invreport(httprequest, team, filters, what, extension):
 
 def _item_context(httprequest, item, undo):
     title = [
-        "Reagent - {}".format(item.reagent.name),
+        "Product - {}".format(item.reagent.name),
         "Supplier - {}".format(item.supplier.name),
         "Catalogue Number - {}".format(item.reagent.cat_no) if item.sol is None else "",
         "Team - {}".format(item.team.name),
@@ -2056,7 +2056,7 @@ def _item_context(httprequest, item, undo):
 def _vol_context(httprequest, item, undo):
     stripe = False
     title = [
-        "Reagent - {}".format(item.reagent.name),
+        "Product - {}".format(item.reagent.name),
         "Supplier - {}".format(item.supplier.name),
         "Catalogue Number - {}".format(item.reagent.cat_no) if item.sol is None else "",
         "Team - {}".format(item.team.name),
@@ -2693,7 +2693,7 @@ def view_man_info(httprequest, pk):
             is_active=True, recipe=None, inserts_req=True
         )
         headings = [
-            "Reagent Name",
+            "Product Name",
             "Catalogue Number",
             "Default Supplier",
             "Latest Insert Version",
@@ -3049,7 +3049,7 @@ def recipe(httprequest, pk):
 @user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def newinv(httprequest, pk):
     if pk == "_":
-        title = "Select Reagent to Book-in"
+        title = "Select Product to Book-in"
         template = "stock_web/invform.html"
         form = NewInvForm1
         if httprequest.method == "POST":
@@ -3322,7 +3322,7 @@ def createnewsol(httprequest, pk):
                     sum_vol += Decimal(vol)
                     if Decimal(invitem.current_vol) - Decimal(vol) < 0:
                         errors += [
-                            "Reagent {} only has {}µl in the tube. Cannot take {}µl".format(
+                            "Product {} only has {}µl in the tube. Cannot take {}µl".format(
                                 invitem.reagent.name, invitem.current_vol, vol
                             )
                         ]
@@ -3364,7 +3364,7 @@ def createnewsol(httprequest, pk):
             ]:
                 if item.is_op == False:
                     messages_to_show += [
-                        "Reagent {} was not previously open. It has now been marked as open on its date received".format(
+                        "Product {} was not previously open. It has now been marked as open on its date received".format(
                             item
                         )
                     ]
@@ -3407,7 +3407,7 @@ def createnewsol(httprequest, pk):
         if comp_vol == False:
             vol = False
             headings = [
-                "Reagent Name",
+                "Product Name",
                 "Supplier",
                 "Expiry Date",
                 "Stock Number",
@@ -3420,7 +3420,7 @@ def createnewsol(httprequest, pk):
         elif comp_vol == True:
             vol = True
             headings = [
-                "Reagent Name",
+                "Product Name",
                 "Supplier",
                 "Expiry Date",
                 "Stock Number",
@@ -3567,7 +3567,7 @@ def uploadreagents(httprequest):
         httprequest,
         "stock_web/uploadreagentsform.html",
         {
-            "header": ["New Reagent Upload"],
+            "header": ["New Product Upload"],
             "form": form,
             "toolbar": _toolbar(httprequest, active="new"),
             "submiturl": submiturl,
@@ -3913,7 +3913,7 @@ def changemin(httprequest, pk):
     cancelurl = reverse("stock_web:listinv")
     toolbar = _toolbar(httprequest, active="Edit Data")
     if pk == "_":
-        header = ["Select Reagent to Change Minimum Stock Level"]
+        header = ["Select Product to Change Minimum Stock Level"]
         form = ChangeMinForm1
         if httprequest.method == "POST":
             if "submit" not in httprequest.POST or httprequest.POST["submit"] != "save":
@@ -3996,7 +3996,7 @@ def changedefsup(httprequest, pk):
     toolbar = _toolbar(httprequest, active="Edit Data")
     if pk == "_":
         header = [
-            "Select Reagent to Change Default Supplier - THIS WILL NOT AFFECT EXISTING ITEMS"
+            "Select Product to Change Default Supplier - THIS WILL NOT AFFECT EXISTING ITEMS"
         ]
         form = ChangeDefSupForm1
         if httprequest.method == "POST":
@@ -4086,7 +4086,7 @@ def changedefteam(httprequest, pk):
     toolbar = _toolbar(httprequest, active="Edit Data")
     if pk == "_":
         header = [
-            "Select Reagent to Change Default Team - THIS WILL NOT AFFECT EXISTING ITEMS"
+            "Select Product to Change Default Team - THIS WILL NOT AFFECT EXISTING ITEMS"
         ]
         form = ChangeDefTeamForm1
         if httprequest.method == "POST":
@@ -4417,7 +4417,7 @@ def undoitem(httprequest, task, pk):
             and item.current_vol != item.vol_rec
         ):
             title += [
-                "THIS WILL REMOVE ALL USES OF THIS REAGENT AND SET ITS VOLUME BACK TO ITS VOLUME RECEIVED"
+                "THIS WILL REMOVE ALL USES OF THIS PRODUCT AND SET ITS VOLUME BACK TO ITS VOLUME RECEIVED"
             ]
 
         if httprequest.method == "POST":
