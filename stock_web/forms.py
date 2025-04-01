@@ -327,8 +327,9 @@ class ValItemForm(forms.ModelForm):
 
     class Meta:
         model = Inventory
-        fields = ("date_op", "lot_no")
+        fields = ("date_op", "lot_no", "date_rec")
         widgets = {"date_op": forms.HiddenInput,
+                   "date_rec": forms.HiddenInput,
                 }
 
     def clean(self):
@@ -496,7 +497,7 @@ class UploadReagentsForm(forms.Form):
             for line in self.files["file"].readlines():
                 line = line.decode("utf-8").strip()
                 error = False
-                if len(line.split(",")) != 7:
+                if len(line.split(",")) != 9:
                     error = True
 
             if error == True:

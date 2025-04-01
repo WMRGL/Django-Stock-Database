@@ -177,6 +177,8 @@ class Reagents(models.Model):
         verbose_name="Most Recent Kit Insert",
     )
     kit_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Kit Name")
+    room = models.ForeignKey(Room, on_delete=models.PROTECT, blank=True, null=True)
+    location = models.ForeignKey(Location, on_delete=models.PROTECT, blank=True, null=True)
     @classmethod
     def create(cls, values):
         with transaction.atomic():
@@ -843,8 +845,7 @@ class Inventory(models.Model):
 
         with transaction.atomic():
             val = Validation.new(values["val_date"], values["val_run"].upper(), user)
-
-            Inventory.objects.filter(reagent=reagent_id, lot_no=lot).update(val_id=val)
+            Inventory.objects.filter(reagent=reagent_id, lot_no=lot, date_rec=values["date_rec"]).update(val_id=val)
             return Inventory.objects.filter(reagent=reagent_id, lot_no=lot, val_id=val)
 
     @classmethod

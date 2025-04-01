@@ -2462,7 +2462,9 @@ def openitem(httprequest, pk):
 @user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def valitem(httprequest, pk):
     item = Inventory.objects.get(pk=int(pk))
+    print(item.date_rec)
     lot_no = item.lot_no
+
     form = ValItemForm
     if Inventory.objects.get(pk=int(pk)).is_op == False:
         return HttpResponseRedirect(reverse("stock_web:item", args=[pk]))
@@ -2480,7 +2482,9 @@ def valitem(httprequest, pk):
             )
         else:
             if form.is_valid():
-                if form.cleaned_data["lot_no"] != lot_no:
+                form_lot = form.cleaned_data["lot_no"]
+
+                if  form_lot != lot_no :
                     messages.error(httprequest, "WARNING - LOT NUMBERS DO NOT MATCH")
                     return HttpResponseRedirect(reverse("stock_web:item", args=[pk]))
                 validated = Inventory.validate(
@@ -3541,8 +3545,8 @@ def uploadreagents(httprequest):
                             name=row["Default Supplier"]
                         )
                         values["team_def"] = Teams.objects.get(name=row["Default Team"])
-                        values["room"] = Room.objects.get(room_name=row["room"])
-                        values["location"] = Location.objects.get(name=row["location"])
+                        values["room"] = Room.objects.get(room_name=row["Room"])
+                        values["location"] = Location.objects.get(name=row["Location"])
                         values["min_count"] = row["Minimum Stock Level"]
                         values["track_vol"] = (
                             True if row["Volume tracked"] == 1 else False
