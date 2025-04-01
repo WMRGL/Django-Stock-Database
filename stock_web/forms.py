@@ -327,8 +327,9 @@ class ValItemForm(forms.ModelForm):
 
     class Meta:
         model = Inventory
-        fields = ("date_op",)
-        widgets = {"date_op": forms.HiddenInput}
+        fields = ("date_op", "lot_no")
+        widgets = {"date_op": forms.HiddenInput,
+                }
 
     def clean(self):
         super(ValItemForm, self).clean()

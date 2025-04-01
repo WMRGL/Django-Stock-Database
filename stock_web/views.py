@@ -934,7 +934,7 @@ def compsearch(httprequest):
 @user_passes_test(is_logged_in, login_url=LOGINURL)
 @user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def listinv(httprequest):
-    title = "List of Reagents"
+    title = "List of Products"
     headings = [
         "Reagent Name",
         "Number Unopen (Or Volume) In Stock",
@@ -2462,6 +2462,7 @@ def openitem(httprequest, pk):
 @user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def valitem(httprequest, pk):
     item = Inventory.objects.get(pk=int(pk))
+    lot_no = item.lot_no
     form = ValItemForm
     if Inventory.objects.get(pk=int(pk)).is_op == False:
         return HttpResponseRedirect(reverse("stock_web:item", args=[pk]))
@@ -2479,6 +2480,9 @@ def valitem(httprequest, pk):
             )
         else:
             if form.is_valid():
+                if form.cleaned_data["lot_no"] != lot_no:
+                    messages.error(httprequest, "WARNING - LOT NUMBERS DO NOT MATCH")
+                    return HttpResponseRedirect(reverse("stock_web:item", args=[pk]))
                 validated = Inventory.validate(
                     form.cleaned_data,
                     Inventory.objects.get(pk=int(pk)).reagent,
@@ -2922,7 +2926,7 @@ def item(httprequest, pk):
     except:
         messages.success(
             httprequest,
-            "The item you're trying to access does not exist.\n If you think you are getting this message in error please email GeneticsLabsBioinformatics@oxnet.nhs.uk",
+            "The item you're trying to access does not exist.\n If you think you are getting this message in error please email bwc.RGLITTeam@nhs.net",
         )
         return HttpResponseRedirect(reverse("stock_web:listinv"))
     if item.reagent.track_vol == False:
@@ -3500,7 +3504,7 @@ def newreagent(httprequest):
         httprequest,
         "stock_web/newreagentform.html",
         {
-            "header": ["New Reagent Input"],
+            "header": ["New Product Input"],
             "form": form,
             "toolbar": _toolbar(httprequest, active="new"),
             "submiturl": submiturl,

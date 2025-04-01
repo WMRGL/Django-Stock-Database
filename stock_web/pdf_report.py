@@ -24,7 +24,7 @@ def fake_for_pages(body, title, httpresponse, user):
     def head_footer(canvas, doc):
         canvas.saveState()
         P = Paragraph(
-            "BROKEN - Contact GeneticsLabsBioinformatics@oxnet.nhs.uk", styleNormal
+            "BROKEN - Contact bwc.RGLITTeam@nhs.net", styleNormal
         )
         w, h = P.wrap(doc.width, doc.bottomMargin)
         P.drawOn(canvas, doc.leftMargin, h)
@@ -33,7 +33,7 @@ def fake_for_pages(body, title, httpresponse, user):
         P.drawOn(canvas, doc.width + doc.leftMargin, h)
 
         P = Paragraph(
-            "BUGGED - Contact GeneticsLabsBioinformatics@oxnet.nhs.uk", styleHeading
+            "BUGGED - Contact bwc.RGLITTeam@nhs.net", styleHeading
         )
         w, h = P.wrap(doc.width + doc.leftMargin + doc.rightMargin, doc.topMargin)
         P.drawOn(canvas, 0, doc.height + doc.topMargin)

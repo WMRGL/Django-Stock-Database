@@ -177,7 +177,6 @@ class Reagents(models.Model):
         verbose_name="Most Recent Kit Insert",
     )
     kit_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Kit Name")
-
     @classmethod
     def create(cls, values):
         with transaction.atomic():
