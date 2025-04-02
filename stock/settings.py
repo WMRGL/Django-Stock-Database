@@ -103,6 +103,12 @@ SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 ###### OCCASIONALLY WILL NEED TO RUN
 ######"django-admin clearsessions" TO CLEAR OLD DATA###
 
+DATABASE_ROUTERS = ["stock.database_router.AccountRouter"]
+
+AUTHENTICATION_BACKENDS = (
+    'stock_web.authentication.ShireBackend',
+    'django.contrib.auth.backends.ModelBackend',
+    )
 
 
 # Password validation
@@ -148,3 +154,26 @@ STATIC_URL = '/static/'
 STATIC_ROOT=os.path.join(BASE_DIR,"static")
 if DEBUG==False:
     SELECT2_CSS="django_select2/select2.min.css"
+
+# settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+    },
+    'loggers': {
+        'stock_web.authentication': {  # Replace with your app name
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

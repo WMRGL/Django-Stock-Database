@@ -618,7 +618,8 @@ def loginview(httprequest):
                     username=form.cleaned_data["username"],
                     password=form.cleaned_data["password"],
                 )
-                if user is not None and user.is_active:
+                print("not none ", user)
+                if user is not None:
                     login(httprequest, user)
                     # Autosets the staff status based on group
                     if (
@@ -629,6 +630,12 @@ def loginview(httprequest):
                     else:
                         user.is_staff = False
                     user.save()
+                    try:
+                        ForceReset.objects.get(user=httprequest.user.pk)
+                    except ForceReset.DoesNotExist:
+                        ForceReset.objects.create(
+                            user=httprequest.user, force_password_change=True
+                        )
                     if (
                         ForceReset.objects.get(
                             user=httprequest.user.pk

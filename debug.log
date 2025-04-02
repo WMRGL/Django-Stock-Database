@@ -1,0 +1,12 @@
+Attempting to authenticate user: IHON
+Database error during STAFF model query: (2013, "Lost connection to MySQL server at 'reading initial communication packet', system error: 104")
+Attempting to authenticate user: IHON
+Attempting to authenticate user: IHON
+Query result: <QuerySet [<STAFF: STAFF object (IHON)>]>
+Attempting to authenticate user: IHON
+Attempting to authenticate user: IHON
+Attempting to authenticate user: IHON
+Attempting to authenticate user: IHON
+Attempting to authenticate user: IHON
+Attempting to authenticate user: rnmn
+Attempting to authenticate user: IHON
