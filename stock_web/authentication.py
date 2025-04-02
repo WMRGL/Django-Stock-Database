@@ -13,7 +13,7 @@ class ShireBackend(BaseBackend):
             return None
         try:
             userValidObj = STAFF.objects.filter(STAFF_CODE=username, EMPLOYMENT_END_DATE__isnull=True)
-            
+
             if userValidObj is None:
                 return None
             for item in userValidObj:

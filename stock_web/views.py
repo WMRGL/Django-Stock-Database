@@ -92,7 +92,7 @@ from .forms import (
 )
 
 LOGINURL = settings.LOGIN_URL
-RESETURL = "/stock/forcereset/"
+# RESETURL = "/stock/forcereset/"
 UNAUTHURL = "/stock/unauth/"
 logger = logging.getLogger(__file__)
 CONDITIONS = {
@@ -127,11 +127,11 @@ def is_super_admin(user):
 # used in user_passes_test decorator to check if the account has a forced password reset active (decorate used as
 # even though after logging in with a reset password it prompts you to change, could go to any link manually to skip
 # decorator means you will always be brought back to change password
-def no_reset(user):
-    if ForceReset.objects.get(user=user.pk).force_password_change == True:
-        return False
-    else:
-        return True
+# def no_reset(user):
+#     if ForceReset.objects.get(user=user.pk).force_password_change == True:
+#         return False
+#     else:
+#         return True
 
 
 def view_404(httprequest, exception):
@@ -401,18 +401,18 @@ def change_password(httprequest):
             user = form.save()
             update_session_auth_hash(httprequest, user)  # Important!
             messages.success(httprequest, "Your password was successfully updated!")
-            try:
-                if (
-                    ForceReset.objects.get(
-                        user=httprequest.user.pk
-                    ).force_password_change
-                    == True
-                ):
-                    reset = ForceReset.objects.get(user_id=user.id)
-                    reset.force_password_change = False
-                    reset.save()
-            except:
-                pass
+            # try:
+            #     if (
+            #         ForceReset.objects.get(
+            #             user=httprequest.user.pk
+            #         ).force_password_change
+            #         == True
+            #     ):
+            #         reset = ForceReset.objects.get(user_id=user.id)
+            #         reset.force_password_change = False
+            #         reset.save()
+            # except:
+            #     pass
             return HttpResponseRedirect(reverse("stock_web:listinv"))
         else:
             errors = []
@@ -471,13 +471,13 @@ def resetpw(httprequest):
             USER = User.objects.get(username=form.data["user"])
             USER.set_password(new_pw)
             USER.save()
-            try:
-                reset = ForceReset.objects.get(user_id=USER.id)
-                reset.force_password_change = True
-            # except just incase user somehow doesn't exist in force reset table (but they should be synced)
-            except:
-                reset = ForceReset.objects.create(user=USER, force_password_change=True)
-            reset.save()
+            # try:
+            #     reset = ForceReset.objects.get(user_id=USER.id)
+            #     reset.force_password_change = True
+            # # except just incase user somehow doesn't exist in force reset table (but they should be synced)
+            # except:
+            #     reset = ForceReset.objects.create(user=USER, force_password_change=True)
+            # reset.save()
             subject = "Password for stock database account '{}' has been reset.".format(
                 USER.username
             )
@@ -515,12 +515,12 @@ def resetpw(httprequest):
     )
 
 
-def forcereset(httprequest):
-    messages.success(
-        httprequest, "You are required to change your password after resetting it"
-    )
-    return HttpResponseRedirect(reverse("stock_web:change_password"))
-
+# def forcereset(httprequest):
+#     messages.success(
+#         httprequest, "You are required to change your password after resetting it"
+#     )
+#     return HttpResponseRedirect(reverse("stock_web:change_password"))
+#
 
 def unauth(httprequest):
     messages.success(
@@ -532,7 +532,7 @@ def unauth(httprequest):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def search(httprequest):
     if httprequest.method == "POST":
         if "submit" not in httprequest.POST or httprequest.POST["submit"] != "search":
@@ -618,7 +618,6 @@ def loginview(httprequest):
                     username=form.cleaned_data["username"],
                     password=form.cleaned_data["password"],
                 )
-                print("not none ", user)
                 if user is not None:
                     login(httprequest, user)
                     # Autosets the staff status based on group
@@ -630,33 +629,34 @@ def loginview(httprequest):
                     else:
                         user.is_staff = False
                     user.save()
-                    try:
-                        ForceReset.objects.get(user=httprequest.user.pk)
-                    except ForceReset.DoesNotExist:
-                        ForceReset.objects.create(
-                            user=httprequest.user, force_password_change=True
-                        )
-                    if (
-                        ForceReset.objects.get(
-                            user=httprequest.user.pk
-                        ).force_password_change
-                        == True
-                    ):
-                        messages.success(
-                            httprequest,
-                            "You are required to change your password after resetting it",
-                        )
-                        return HttpResponseRedirect(
-                            reverse("stock_web:change_password")
-                        )
-                    else:
 
-                        return HttpResponseRedirect(
-                            httprequest.GET["next"]
-                            if "next" in httprequest.GET.keys()
-                            and "logout" not in httprequest.GET["next"]
-                            else reverse("stock_web:listinv")
-                        )
+                    # if (
+                    #     ForceReset.objects.get(
+                    #         user=httprequest.user.pk
+                    #     ).force_password_change
+                    #     == True
+                    # ):
+                    #     messages.success(
+                    #         httprequest,
+                    #         "You are required to change your password after resetting it",
+                    #     )
+                    #     return HttpResponseRedirect(
+                    #         reverse("stock_web:change_password")
+                    #     )
+                    # else:
+                    #
+                    #     return HttpResponseRedirect(
+                    #         httprequest.GET["next"]
+                    #         if "next" in httprequest.GET.keys()
+                    #         and "logout" not in httprequest.GET["next"]
+                    #         else reverse("stock_web:listinv")
+                    #     )
+                    return HttpResponseRedirect(
+                        httprequest.GET["next"]
+                        if "next" in httprequest.GET.keys()
+                           and "logout" not in httprequest.GET["next"]
+                        else reverse("stock_web:listinv")
+                    )
                 else:
                     try:
                         User.objects.get(username=form.cleaned_data["username"])
@@ -678,7 +678,7 @@ def loginview(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def insertdates(httprequest, date, stage):
     if date == "_":
         submiturl = reverse("stock_web:insertdates", args=["_", "_"])
@@ -787,7 +787,7 @@ def insertdates(httprequest, date, stage):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+###@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def valdates(httprequest):
     submiturl = reverse("stock_web:valdates")
     cancelurl = reverse("stock_web:listinv")
@@ -882,7 +882,7 @@ def valdates(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+###@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def compsearch(httprequest):
     if httprequest.method == "POST":
         if "submit" not in httprequest.POST or httprequest.POST["submit"] != "search":
@@ -939,7 +939,7 @@ def compsearch(httprequest):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+###@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def listinv(httprequest):
     title = "List of Products"
     headings = [
@@ -993,7 +993,8 @@ def listinv(httprequest):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+###@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+
 def inventory(httprequest, search, what, sortby, page):
     # forces page 1 if non numberical value entered or <1
     try:
@@ -1478,7 +1479,7 @@ def inventory(httprequest, search, what, sortby, page):
 
 
 @user_passes_test(is_logged_in, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+###@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def stockreport(httprequest, fin, filters, pk, extension):
     submiturl = reverse("stock_web:stockreport", args=[fin, filters, pk, extension])
     cancelurl = reverse("stock_web:listinv")
@@ -1645,7 +1646,7 @@ def stockreport(httprequest, fin, filters, pk, extension):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def invreport(httprequest, team, filters, what, extension):
     submiturl = reverse("stock_web:invreport", args=[type, filters, what, extension])
     cancelurl = reverse("stock_web:listinv")
@@ -2059,7 +2060,7 @@ def _item_context(httprequest, item, undo):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def _vol_context(httprequest, item, undo):
     stripe = False
     title = [
@@ -2283,7 +2284,7 @@ def _vol_context(httprequest, item, undo):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def useitem(httprequest, pk):
     item = Inventory.objects.get(pk=int(pk))
     if item.is_op == False:
@@ -2383,7 +2384,7 @@ def useitem(httprequest, pk):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def openitem(httprequest, pk):
     item = Inventory.objects.get(pk=int(pk))
     form = OpenItemForm
@@ -2466,7 +2467,7 @@ def openitem(httprequest, pk):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def valitem(httprequest, pk):
     item = Inventory.objects.get(pk=int(pk))
     print(item.date_rec)
@@ -2523,7 +2524,7 @@ def valitem(httprequest, pk):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def finishitem(httprequest, pk):
     item = Inventory.objects.get(pk=int(pk))
     form = FinishItemForm
@@ -2655,7 +2656,7 @@ def finishitem(httprequest, pk):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def add_comment(httprequest, pk):
     item = Inventory.objects.get(pk=int(pk))
     form = AddCommentForm
@@ -2696,7 +2697,7 @@ def add_comment(httprequest, pk):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def view_man_info(httprequest, pk):
     if pk == "_":
         title = "Most Recent Manufacturer’s Instructions"
@@ -2808,7 +2809,7 @@ def view_man_info(httprequest, pk):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def confirm_insert(httprequest, pk):
     insert = Insert.objects.get(pk=pk)
     if insert.confirmed_user is not None:
@@ -2857,7 +2858,7 @@ def confirm_insert(httprequest, pk):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def add_man_info(httprequest, pk, copy):
     item = Reagents.objects.get(pk=int(pk))
     form = AddKitInsForm
@@ -2928,7 +2929,7 @@ def add_man_info(httprequest, pk, copy):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def item(httprequest, pk):
     try:
         item = Inventory.objects.select_related(
@@ -2955,7 +2956,7 @@ def item(httprequest, pk):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def recipes(httprequest):
     title = "List of Recipes"
     headings = [
@@ -3015,7 +3016,7 @@ def recipes(httprequest):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def recipe(httprequest, pk):
     item = Recipe.objects.select_related(
         "reagent",
@@ -3057,7 +3058,7 @@ def recipe(httprequest, pk):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def newinv(httprequest, pk):
     if pk == "_":
         title = "Select Product to Book-in"
@@ -3238,7 +3239,7 @@ def newinv(httprequest, pk):
 
 
 @user_passes_test(is_logged_in, login_url=LOGINURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def createnewsol(httprequest, pk):
     recipe = Recipe.objects.get(pk=int(pk))
     title = "Select Items for Recipe: {}".format(recipe)
@@ -3491,7 +3492,7 @@ def createnewsol(httprequest, pk):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def newreagent(httprequest):
     form = NewReagentForm
     if httprequest.method == "POST":
@@ -3525,7 +3526,7 @@ def newreagent(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def uploadreagents(httprequest):
     form = UploadReagentsForm
     if httprequest.method == "POST":
@@ -3611,7 +3612,7 @@ def get_template(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def newsup(httprequest):
     form = NewSupForm
     if httprequest.method == "POST":
@@ -3645,7 +3646,7 @@ def newsup(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def newteam(httprequest):
     form = NewTeamForm
     if httprequest.method == "POST":
@@ -3679,7 +3680,7 @@ def newteam(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def newrecipe(httprequest):
     form = NewRecipeForm
     if httprequest.method == "POST":
@@ -3714,7 +3715,7 @@ def newrecipe(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def activsup(httprequest):
     header = ["Select Supplier To (De)Activate - THIS WILL NOT AFFECT EXISTING ITEMS"]
     form = EditSupForm
@@ -3762,7 +3763,7 @@ def activsup(httprequest):
     )
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def toggle_mi(httprequest):
     header = ["Toggle if Manufacturers Information is required"]
     form = ToggleMiForm
@@ -3811,7 +3812,7 @@ def toggle_mi(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def activteam(httprequest):
     header = ["Select Team To (De)Activate - THIS WILL NOT AFFECT EXISTING ITEMS"]
     form = EditTeamForm
@@ -3860,7 +3861,7 @@ def activteam(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def activreag(httprequest):
     header = ["Select An Item To (De)Activate - THIS WILL NOT AFFECT EXISTING ITEMS"]
     form = EditReagForm
@@ -3918,7 +3919,7 @@ def activreag(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def changemin(httprequest, pk):
     submiturl = reverse("stock_web:changemin", args=[pk])
     cancelurl = reverse("stock_web:listinv")
@@ -4000,7 +4001,7 @@ def changemin(httprequest, pk):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def changedefsup(httprequest, pk):
     submiturl = reverse("stock_web:changedefsup", args=[pk])
     cancelurl = reverse("stock_web:listinv")
@@ -4090,7 +4091,7 @@ def changedefsup(httprequest, pk):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def changedefteam(httprequest, pk):
     submiturl = reverse("stock_web:changedefteam", args=[pk])
     cancelurl = reverse("stock_web:listinv")
@@ -4172,7 +4173,7 @@ def changedefteam(httprequest, pk):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def removesup(httprequest):
     header = ["Select Supplier To Remove"]
     form = RemoveSupForm
@@ -4213,7 +4214,7 @@ def removesup(httprequest):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def editinv(httprequest, pk):
     submiturl = reverse("stock_web:editinv", args=[pk])
     cancelurl = reverse("stock_web:listinv")
@@ -4276,7 +4277,7 @@ def editinv(httprequest, pk):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def changedate(httprequest, pk, type):
     item = Inventory.objects.get(pk=int(pk))
     submiturl = reverse("stock_web:changedate", args=[pk, type])
@@ -4408,7 +4409,7 @@ def changedate(httprequest, pk, type):
 
 
 @user_passes_test(is_admin, login_url=UNAUTHURL)
-@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def undoitem(httprequest, task, pk):
     item = Inventory.objects.get(pk=int(pk))
     submiturl = reverse("stock_web:undoitem", args=[task, pk])
