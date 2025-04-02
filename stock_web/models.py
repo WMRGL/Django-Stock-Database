@@ -65,12 +65,21 @@ class Room(models.Model):
 
     def __str__(self):
         return self.room_name
+    @classmethod
+    def create(cls, name):
+        room = cls.objects.create(room_name=name)
+        return room
 
 
 class Location(models.Model):
     name = models.CharField(max_length=100, unique=True)
     def __str__(self):
         return self.name
+
+    @classmethod
+    def create(cls, name):
+        location = cls.objects.create(name=name)
+        return location
 
 
 
@@ -1172,6 +1181,6 @@ class STAFF(models.Model):
     EMAIL = models.EmailField(verbose_name='email', max_length=70)
     EMPLOYMENT_END_DATE = models.DateTimeField()
     class Meta:
-        app_label = 'stock_web'
+        app_label = 'account'
         managed = False
         db_table = 'STAFF'

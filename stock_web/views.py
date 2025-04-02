@@ -88,7 +88,7 @@ from .forms import (
     ChangeFinForm,
     AddCommentForm,
     AddKitInsForm,
-    ConfirmKitInsForm,
+    ConfirmKitInsForm, NewRoomForm, NewLocationForm,
 )
 
 LOGINURL = settings.LOGIN_URL
@@ -317,6 +317,8 @@ def _toolbar(httprequest, active=""):
         new_dropdown = [
             {"name": "Inventory Item", "url": reverse("stock_web:newinv", args=["_"])},
             {"name": "Supplier", "url": reverse("stock_web:newsup")},
+            {"name": "Room", "url": reverse("stock_web:newroom")},
+            {"name": "Location", "url": reverse("stock_web:newlocation")},
             {"name": "Team", "url": reverse("stock_web:newteam")},
             {"name": "Product", "url": reverse("stock_web:newreagent")},
             {
@@ -4721,3 +4723,74 @@ def undoitem(httprequest, task, pk):
             "cancelurl": cancelurl,
         },
     )
+
+
+@user_passes_test(is_admin, login_url=UNAUTHURL)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+def newroom(httprequest):
+    form = NewRoomForm
+    if httprequest.method == "POST":
+        if "submit" not in httprequest.POST or httprequest.POST["submit"] != "save":
+            return HttpResponseRedirect(
+                httprequest.session["referer"]
+                if ("referer" in httprequest.session)
+                else reverse("stock_web:listinv")
+            )
+        else:
+            form = form(httprequest.POST)
+            if form.is_valid():
+                name =form.cleaned_data["room_name"]
+                Room.create(name)
+                messages.info(httprequest, "{} Added".format(form.cleaned_data["room_name"]))
+                return HttpResponseRedirect(reverse("stock_web:newroom"))
+    else:
+        form = form()
+    submiturl = reverse("stock_web:newroom")
+    cancelurl = reverse("stock_web:listinv")
+    return render(
+        httprequest,
+        "stock_web/form.html",
+        {
+            "header": ["New Room Input"],
+            "form": form,
+            "toolbar": _toolbar(httprequest, active="new"),
+            "submiturl": submiturl,
+            "cancelurl": cancelurl,
+        },
+    )
+
+
+@user_passes_test(is_admin, login_url=UNAUTHURL)
+#@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
+def newlocation(httprequest):
+    form = NewLocationForm
+    if httprequest.method == "POST":
+        if "submit" not in httprequest.POST or httprequest.POST["submit"] != "save":
+            return HttpResponseRedirect(
+                httprequest.session["referer"]
+                if ("referer" in httprequest.session)
+                else reverse("stock_web:listinv")
+            )
+        else:
+            form = form(httprequest.POST)
+            if form.is_valid():
+                name =form.cleaned_data["name"]
+                Location.create(name)
+                messages.info(httprequest, "{} Added".format(form.cleaned_data["name"]))
+                return HttpResponseRedirect(reverse("stock_web:newlocation"))
+    else:
+        form = form()
+    submiturl = reverse("stock_web:newlocation")
+    cancelurl = reverse("stock_web:listinv")
+    return render(
+        httprequest,
+        "stock_web/form.html",
+        {
+            "header": ["New Location Input"],
+            "form": form,
+            "toolbar": _toolbar(httprequest, active="new"),
+            "submiturl": submiturl,
+            "cancelurl": cancelurl,
+        },
+    )
+

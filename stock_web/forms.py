@@ -14,7 +14,7 @@ from .models import (
     Recipe,
     Inventory,
     Teams,
-    Comments,
+    Comments, Room, Location,
 )
 from django.contrib.auth.forms import PasswordChangeForm
 
@@ -1219,3 +1219,41 @@ class TeamOnlyForm(forms.Form):
         widget=Select2Widget,
         required=True,
     )
+
+
+
+class NewRoomForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = ("room_name",)
+
+    def clean(self):
+        super(NewRoomForm, self).clean()
+        if Room.objects.filter(room_name=self.cleaned_data["room_name"]).exists():
+            self.add_error(
+                "room_name",
+                forms.ValidationError(
+                    "A Room with the name {} already exists".format(
+                        self.cleaned_data["room_name"]
+                    )
+                ),
+            )
+
+
+class NewLocationForm(forms.ModelForm):
+    class Meta:
+        model = Location
+        fields = ("name",)
+
+    def clean(self):
+        super(NewLocationForm, self).clean()
+        if Location.objects.filter(name=self.cleaned_data["name"]).exists():
+            self.add_error(
+                "name",
+                forms.ValidationError(
+                    "A Location with the name {} already exists".format(
+                        self.cleaned_data["name"]
+                    )
+                ),
+            )
+
