@@ -25,5 +25,16 @@ DATABASES = {
         'PASSWORD': 'postgres',  # Need to set env var
         'HOST': '127.0.0.1',  # IP of the dbserver
         'PORT': '5432',
+
+    },
+    'Shire_Data': {
+        'ENGINE': 'mssql',
+        'NAME': 'db_name',
+        'USER': 'db_user',
+        'PASSWORD': 'db_pwd',  # Need to set env var
+        'HOST': 'host',  # IP of the dbserver
+        'PORT': 'port',
+
+
     },
 }
