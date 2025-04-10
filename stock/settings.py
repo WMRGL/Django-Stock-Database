@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django_select2',
     'debug_toolbar',
     'bootstrap_daterangepicker',
+    'easyaudit'
     #'django_extensions',
 ]
 
@@ -73,6 +74,8 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django_session_timeout.middleware.SessionTimeoutMiddleware',
+    'easyaudit.middleware.easyaudit.EasyAuditMiddleware',
+
 ]
 
 ROOT_URLCONF = 'stock.urls'

@@ -20,12 +20,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'stock',
-        'USER': 'user_platerplotter',
-        'PASSWORD': 'postgres',  # Need to set env var
-        'HOST': '127.0.0.1',  # IP of the dbserver
-        'PORT': '5432',
-
+        'NAME': 'db_name',
+        'USER': 'db_user',
+        'PASSWORD': 'db_pwd',
+        'HOST': 'host',
+        'PORT': 'port',
     },
     'Shire_Data': {
         'ENGINE': 'mssql',
@@ -34,7 +33,6 @@ DATABASES = {
         'PASSWORD': 'db_pwd',  # Need to set env var
         'HOST': 'host',  # IP of the dbserver
         'PORT': 'port',
-
 
     },
 }
