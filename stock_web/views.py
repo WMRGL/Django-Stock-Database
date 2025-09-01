@@ -12,6 +12,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.db import transaction
 from django.db.models.functions import Lower
+from django.utils.safestring import mark_safe
 from operator import attrgetter
 import openpyxl
 import datetime
@@ -949,6 +950,7 @@ def listinv(httprequest):
         "Number Unopen (Or Volume) In Stock",
         "Number Open In Stock",
         "Minimum Stock Level",
+        "Unit of Measurement",
     ]
     items = (
         Reagents.objects.all()
@@ -965,7 +967,8 @@ def listinv(httprequest):
             int(item.open_no),
             "{}µl".format(item.min_count)
             if item.track_vol == True
-            else int(item.min_count),
+            else item.min_count,
+            item.unit_of_measurement,
         ]
         urls = [
             reverse(
@@ -977,6 +980,7 @@ def listinv(httprequest):
                     1,
                 ],
             ),
+            "",
             "",
             "",
             "",
@@ -2820,11 +2824,23 @@ def confirm_insert(httprequest, pk):
     submiturl = reverse("stock_web:confirm_insert", args=[pk])
     cancelurl = reverse("stock_web:view_man_info", args=["_"])
     toolbar = _toolbar(httprequest, active="Manufacturer’s Instructions")
+
+    location_text = f"Manufacturers instructions link: {insert.location}"
+    if insert.location:
+        val = URLValidator()
+        try:
+            val(insert.location)
+            location_text = mark_safe(
+                f'Manufacturers instructions link: <a href="{insert.location}" target="_blank" rel="noopener noreferrer">{insert.location}</a>'
+            )
+        except ValidationError:
+            pass
+
     subheading = [
         f"Version: {insert.version}",
         f"Date Checked: {insert.date_checked}",
         f"Checked By: {insert.checked_user}",
-        f"Location: {insert.location}",
+        location_text,
         f"Actions Taken: {insert.initial_action}",
     ]
     if httprequest.method == "POST":
@@ -4793,4 +4809,3 @@ def newlocation(httprequest):
             "cancelurl": cancelurl,
         },
     )
-

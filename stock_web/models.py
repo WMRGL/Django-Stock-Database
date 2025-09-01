@@ -188,6 +188,7 @@ class Reagents(models.Model):
     kit_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Kit Name")
     room = models.ForeignKey(Room, on_delete=models.PROTECT, blank=True, null=True)
     location = models.ForeignKey(Location, on_delete=models.PROTECT, blank=True, null=True)
+    unit_of_measurement = models.CharField(max_length=20, blank=True, null=True, verbose_name="Unit of Measurement")
     @classmethod
     def create(cls, values):
         with transaction.atomic():
@@ -572,7 +573,7 @@ class Insert(models.Model):
         related_name="1+",
     )
 
-    location = models.CharField(max_length=150, verbose_name="Location of Kit Insert")
+    location = models.TextField( verbose_name="Manufacturers instructions link")
 
     initial_action = models.CharField(max_length=150, verbose_name="Initial Action Taken")
 
