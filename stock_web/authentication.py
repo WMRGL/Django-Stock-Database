@@ -13,9 +13,8 @@ class ShireBackend(BaseBackend):
             return None
         try:
             userValidObj = STAFF.objects.filter(STAFF_CODE=username, EMPLOYMENT_END_DATE__isnull=True)
-            print("Shire user found")
+
             if userValidObj is None:
-                print("Shire Backend: User not found")
                 return None
             for item in userValidObj:
                 # Do the password check separate, because the SQL server comparison
@@ -32,10 +31,8 @@ class ShireBackend(BaseBackend):
             try:
                 # Try to find the user record in the auth_user table
                 user = User.objects.get(username=username)
-                print("Django user found")
             except User.DoesNotExist:
                 # If not found create a new user. There's no need to set a password
-                print("Django user not found, creating new user")
                 user = User(username=username)
                 user.save()
             return user
