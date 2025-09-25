@@ -3,7 +3,7 @@ from dateutil.relativedelta import relativedelta
 from django import forms
 from django.db.models import F
 from django.contrib.auth.models import User
-from django_select2.forms import Select2Widget
+from django_select2.forms import Select2Widget, ModelSelect2Widget
 from decimal import Decimal
 from bootstrap_daterangepicker import widgets, fields
 from .models import (
@@ -47,10 +47,19 @@ class ShowReagentMiChoiceField(forms.ModelChoiceField):
 
 
 class NewInvForm1(forms.ModelForm):
+    class ReagentWidget(ModelSelect2Widget):
+        search_fields = [
+            "name__icontains",
+            "cat_no__icontains",
+        ]
+
+        def label_from_instance(self, obj):
+            return f"{obj.name} ({obj.cat_no})"
+
     reagent = forms.ModelChoiceField(
-        queryset=Reagents.objects.all().exclude(is_active=False).order_by("name"),
+        queryset=Reagents.objects.filter(is_active=True).order_by("name"),
         label="Reagent",
-        widget=Select2Widget,
+        widget=ReagentWidget(attrs={"style": "width:25em"}),
     )
 
     class Meta:
@@ -60,7 +69,10 @@ class NewInvForm1(forms.ModelForm):
     def clean(self):
         super(NewInvForm1, self).clean()
         errors = []
-        item = Reagents.objects.get(pk=self.data["reagent"])
+        reagent_pk = self.cleaned_data.get("reagent")
+        if not reagent_pk:
+            return
+        item = reagent_pk
         if item.recipe is not None:
             for i in range(1, item.recipe.length() + 1):
                 if (
@@ -1256,4 +1268,3 @@ class NewLocationForm(forms.ModelForm):
                     )
                 ),
             )
-

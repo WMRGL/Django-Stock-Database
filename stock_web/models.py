@@ -189,6 +189,7 @@ class Reagents(models.Model):
     room = models.ForeignKey(Room, on_delete=models.PROTECT, blank=True, null=True)
     location = models.ForeignKey(Location, on_delete=models.PROTECT, blank=True, null=True)
     unit_of_measurement = models.CharField(max_length=20, blank=True, null=True, verbose_name="Unit of Measurement")
+    standing_order = models.BooleanField(default=False, verbose_name="Standing Order")
     @classmethod
     def create(cls, values):
         with transaction.atomic():

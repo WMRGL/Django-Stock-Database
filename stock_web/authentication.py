@@ -7,30 +7,32 @@ from stock_web.models import STAFF
 class ShireBackend(BaseBackend):
 
     def authenticate(self, request, username=None, password=None):
-        isUserPasswordValid = False
+        is_user_password_valid = False
         # Make sure the username and password are both provided
         if username is None or password is None:
             return None
         try:
-            userValidObj = STAFF.objects.filter(STAFF_CODE=username, EMPLOYMENT_END_DATE__isnull=True)
-
-            if userValidObj is None:
+            user_valid_obj = STAFF.objects.filter(STAFF_CODE=username, EMPLOYMENT_END_DATE__isnull=True)
+            # user_valid_obj = get_object_or_404(STAFF, STAFF_CODE=username, EMPLOYMENT_END_DATE__isnull=True)
+            # if user_valid_obj.PASSWORD == password:
+            #     is_user_password_valid = True
+            if user_valid_obj is None:
                 return None
-            for item in userValidObj:
+            for item in user_valid_obj:
                 # Do the password check separate, because the SQL server comparison
                 # is not case-sensitive.  Whereas the code below is!
                 if item.PASSWORD == password:
-                    isUserPasswordValid = True
+                    is_user_password_valid = True
 
         except Exception:
             return None
 
         # The following logic is predicated on each user being replicated in
         # the standard Django structure (the User model class)
-        if isUserPasswordValid:
+        if is_user_password_valid:
             try:
                 # Try to find the user record in the auth_user table
-                user = User.objects.get(username=username)
+                user = User.objects.get(username__iexact=username)
             except User.DoesNotExist:
                 # If not found create a new user. There's no need to set a password
                 user = User(username=username)

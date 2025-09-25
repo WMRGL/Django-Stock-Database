@@ -950,7 +950,8 @@ def listinv(httprequest):
         "Number Unopen (Or Volume) In Stock",
         "Number Open In Stock",
         "Minimum Stock Level",
-        "Unit of Measurement",
+        "Unit of Issue",
+        "Standing Order"
     ]
     items = (
         Reagents.objects.all()
@@ -969,6 +970,7 @@ def listinv(httprequest):
             if item.track_vol == True
             else item.min_count,
             item.unit_of_measurement,
+            "Yes" if item.standing_order else "No",
         ]
         urls = [
             reverse(
