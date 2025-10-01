@@ -959,9 +959,14 @@ class Solutions(models.Model):
         verbose_name_plural = "Solutions"
 
     def __str__(self):
-        return str(
-            f"{self.recipe} - {Inventory.objects.get(sol=self.id).internal.batch_number}"
-        )
+        try:
+            inventory_item = Inventory.objects.get(sol=self.id)
+            return f"{self.recipe} - {inventory_item.internal.batch_number}"
+        except Inventory.DoesNotExist:
+            return f"{self.recipe} - (Inventory item missing)"
+
+        # inventory_item = Inventory.objects.get(sol=self.id)
+        # return f"{self.recipe} - {inventory_item.internal.batch_number}"
 
     recipe = models.ForeignKey(
         Recipe, on_delete=models.PROTECT, verbose_name="Recipe Name"
@@ -1133,6 +1138,11 @@ class Solutions(models.Model):
 
     # Function to display stock number (which is stored in inventory record, not solution), used in Admin view
     def Stock_Number(self):
+        # try:
+        #     stock_number = Inventory.objects.get(sol=self.id)
+        #     return str(stock_number.internal.batch_number)
+        # except Inventory.DoesNotExist:
+        #     return "(Inventory item missing)"
         stock_number = Inventory.objects.get(sol=self.id)
         return str(stock_number.internal.batch_number)
 

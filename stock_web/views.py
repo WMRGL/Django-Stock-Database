@@ -970,7 +970,7 @@ def listinv(httprequest):
             if item.track_vol == True
             else item.min_count,
             item.unit_of_measurement,
-            "Yes" if item.standing_order else "No",
+            "Yes" if item.unit_of_measurement else "No",
         ]
         urls = [
             reverse(
@@ -986,6 +986,8 @@ def listinv(httprequest):
             "",
             "",
             "",
+            "",
+
         ]
         body.append(
             (zip(values, urls), True if item.count_no < item.min_count else False)

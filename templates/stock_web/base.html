@@ -143,6 +143,9 @@
 		<link href="{% static 'base/bootstrap.min.css' %}" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
 		<!-- Latest compiled and minified JavaScript -->
 		<script src="{% static 'base/bootstrap.min.js' %}" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css" />
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
+
 
   </head>
 
@@ -152,6 +155,20 @@
     {% endblock toolbar %}
     {% block content %}
     {% endblock content %}
+
+    <script>
+        $(document).ready( function () {
+            $('.defaultTable').DataTable({
+                info: true,
+                ordering: true,
+                // paging: true,
+                autoWidth: false,
+                width: "100%",
+                dom: 'lBfrtip'
+
+            });
+        } );
+    </script>
   </body>
   {% if messages %}
 <ul class="messages">
