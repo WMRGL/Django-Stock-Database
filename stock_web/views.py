@@ -2736,8 +2736,8 @@ def view_man_info(httprequest, pk):
             ]
             if item.latest_insert is not None:
                 link = reverse("stock_web:view_man_info", args=[item.id])
-            elif httprequest.user.is_staff == False:
-                link = ""
+            # elif httprequest.user.is_staff == False:
+            #     link = ""
             else:
                 link = reverse("stock_web:add_man_info", args=[item.id, 0])
             urls = [link, link, link, link, link]
@@ -2762,8 +2762,8 @@ def view_man_info(httprequest, pk):
             "Confirmed By",
             "Date Confirmed",
         ]
-        if httprequest.user.is_staff == True:
-            headings.append("Action")
+        # if httprequest.user.is_staff == True:
+        headings.append("Action")
         body = []
         val = URLValidator()
         for ins in inserts:
@@ -2777,38 +2777,38 @@ def view_man_info(httprequest, pk):
                 ins.confirmed_user if ins.confirmed_user is not None else "",
                 ins.date_confirmed if ins.confirmed_user is not None else "",
             ]
-            if ins.confirmed_user is None and httprequest.user.is_staff == True:
+            if ins.confirmed_user is None:
                 link = reverse("stock_web:confirm_insert", args=[ins.id])
             else:
                 link = ""
             urls = [link] * 8
-            if httprequest.user.is_staff == True:
-                if ins.id == Reagents.objects.get(pk=int(pk)).latest_insert_id:
-                    values.append("Copy Version")
-                    urls.append(
-                        reverse(
-                            "stock_web:add_man_info",
-                            args=[Reagents.objects.get(pk=int(pk)).id, 1],
-                        )
+            # if httprequest.user.is_staff == True:
+            if ins.id == Reagents.objects.get(pk=int(pk)).latest_insert_id:
+                values.append("Copy Version")
+                urls.append(
+                    reverse(
+                        "stock_web:add_man_info",
+                        args=[Reagents.objects.get(pk=int(pk)).id, 1],
                     )
-                else:
-                    values.append("")
-                    urls.append("")
+                )
+            else:
+                values.append("")
+                urls.append("")
             try:
                 val(values[3])
                 urls[3] = values[3]
             except ValidationError as e:
                 pass
             body.append((zip(values, urls), False))
-        if httprequest.user.is_staff == True:
-            values = ["ADD NEW"] * 9
-            urls = [
-                reverse(
-                    "stock_web:add_man_info",
-                    args=[Reagents.objects.get(pk=int(pk)).id, 0],
-                )
-            ] * 9
-            body.append((zip(values, urls), False))
+        # if httprequest.user.is_staff == True:
+        values = ["ADD NEW"] * 9
+        urls = [
+            reverse(
+                "stock_web:add_man_info",
+                args=[Reagents.objects.get(pk=int(pk)).id, 0],
+            )
+        ] * 9
+        body.append((zip(values, urls), False))
     context = {
         "header": title,
         "headings": headings,
@@ -2818,7 +2818,7 @@ def view_man_info(httprequest, pk):
     return render(httprequest, "stock_web/list.html", context)
 
 
-@user_passes_test(is_admin, login_url=UNAUTHURL)
+@user_passes_test(is_logged_in, login_url=LOGINURL)
 #@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def confirm_insert(httprequest, pk):
     insert = Insert.objects.get(pk=pk)
@@ -2879,7 +2879,7 @@ def confirm_insert(httprequest, pk):
     )
 
 
-@user_passes_test(is_admin, login_url=UNAUTHURL)
+@user_passes_test(is_logged_in, login_url=LOGINURL)
 #@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def add_man_info(httprequest, pk, copy):
     item = Reagents.objects.get(pk=int(pk))
