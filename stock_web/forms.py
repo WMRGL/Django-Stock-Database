@@ -1268,3 +1268,6 @@ class NewLocationForm(forms.ModelForm):
                     )
                 ),
             )
+
+class AddAdmin(forms.Form):
+    username = forms.CharField(max_length=20, label="Username")

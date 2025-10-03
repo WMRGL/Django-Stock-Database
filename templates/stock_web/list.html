@@ -14,19 +14,25 @@
           </ul>
         {% endfor %}
 
-        <table class="table table-striped ">
-            <tr>
+        <table class="table table-bordered table-hover table-striped defaultTable">
+        <thead>
+        <tr class="table-dark">
                 {% for item in headings %}
                 <th scope="col">{{ item }}</th>
                 {% endfor %}
             </tr>
-            {% for row, low in body %}
+        </thead>
+            <tbody>
+             {% for row, low in body %}
             <tr {% if low %} scope="col" style="color:red" {% endif %}>
                 {% for entry, url in row %}
                   <td>{% if url %}<a href="{{ url }}">{% endif %}{{ entry|wordwrap:50|linebreaksbr }}{% if url %}</a>{% endif %}</td>
                 {% endfor %}
             </tr>
             {% endfor %}
+            </tbody>
+
+
         </table>
 
 </div>

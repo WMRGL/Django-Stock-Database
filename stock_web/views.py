@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User, Group
 from django.db.models import F, Q
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.db import transaction
 from django.db.models.functions import Lower
@@ -1381,18 +1381,18 @@ def inventory(httprequest, search, what, sortby, page):
         "body": body,
         "toolbar": _toolbar(httprequest, active="Inventory"),
     }
-    if pages:
-        context.update(
-            {
-                "pages": pages,
-                "text1": "Click to change page",
-                "text2": "Current page is {} showing items {}-{}".format(
-                    page,
-                    (page - 1) * 200,
-                    page * 200 if (page * 200 < len(items)) else (len(items)),
-                ),
-            }
-        )
+    # if pages:
+    #     context.update(
+    #         {
+    #             "pages": pages,
+    #             "text1": "Click to change page",
+    #             "text2": "Current page is {} showing items {}-{}".format(
+    #                 page,
+    #                 (page - 1) * 200,
+    #                 page * 200 if (page * 200 < len(items)) else (len(items)),
+    #             ),
+    #         }
+    #     )
     if httprequest.method == "POST" and search == "search":
         if ".xlsx" in httprequest.POST["submit"]:
             workbook = openpyxl.Workbook()
@@ -4813,3 +4813,8 @@ def newlocation(httprequest):
             "cancelurl": cancelurl,
         },
     )
+
+
+def add_admin(request):
+    group = get_object_or_404(Group, name="Admin")
+
