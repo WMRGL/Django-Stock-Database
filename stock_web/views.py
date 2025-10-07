@@ -25,6 +25,9 @@ import textwrap
 import logging
 import validators
 from decimal import Decimal
+
+from django.views.generic import ListView
+
 from .prime import PRIME
 from .cyto import ADD_CYTO
 from .email import send, EMAIL
@@ -89,7 +92,7 @@ from .forms import (
     ChangeFinForm,
     AddCommentForm,
     AddKitInsForm,
-    ConfirmKitInsForm, NewRoomForm, NewLocationForm,
+    ConfirmKitInsForm, NewRoomForm, NewLocationForm, ReviewAdminForm,
 )
 
 LOGINURL = settings.LOGIN_URL
@@ -114,7 +117,7 @@ def is_admin(user):
 
 
 def is_super_admin(user):
-    return user.is_staff
+    return user.groups.filter(name="Superadmin").exists()
 
 
 # def add_cyto(httprequest):
@@ -311,7 +314,7 @@ def _toolbar(httprequest, active=""):
             toolbar[0][0].append(
                 {
                     "name": "Update Users",
-                    "url": "/stock/admin/auth/user/",
+                    "url": reverse("stock_web:list_users"),
                     "glyphicon": "user",
                 }
             )
@@ -365,22 +368,22 @@ def _toolbar(httprequest, active=""):
             }
         )
 
-    toolbar[1][0].append(
-        {
-            "name": "Account Settings",
-            "glyphicon": "cog",
-            "dropdown": [
-                {
-                    "name": "Logout " + str(httprequest.user),
-                    "url": reverse("stock_web:logout_page"),
-                },
-                {
-                    "name": "Change Password",
-                    "url": reverse("stock_web:change_password"),
-                },
-            ],
-        }
-    )
+    # toolbar[1][0].append(
+    #     {
+    #         "name": "Account Settings",
+    #         "glyphicon": "cog",
+    #         "dropdown": [
+    #             {
+    #                 "name": "Logout " + str(httprequest.user),
+    #                 "url": reverse("stock_web:logout_page"),
+    #             },
+    #             {
+    #                 "name": "Change Password",
+    #                 "url": reverse("stock_web:change_password"),
+    #             },
+    #         ],
+    #     }
+    # )
 
     for entry in toolbar[0][0]:
         if entry["name"] == active:
@@ -390,7 +393,7 @@ def _toolbar(httprequest, active=""):
             entry["active"] = True
     return toolbar
 
-
+"""
 @user_passes_test(is_logged_in, login_url=LOGINURL)
 def change_password(httprequest):
     if httprequest.method == "POST":
@@ -517,6 +520,7 @@ def resetpw(httprequest):
         },
     )
 
+"""
 
 # def forcereset(httprequest):
 #     messages.success(
@@ -4022,7 +4026,7 @@ def changemin(httprequest, pk):
     )
 
 
-@user_passes_test(is_admin, login_url=UNAUTHURL)
+@user_passes_test(is_super_admin, login_url=UNAUTHURL)
 #@user_passes_test(no_reset, login_url=RESETURL, redirect_field_name=None)
 def changedefsup(httprequest, pk):
     submiturl = reverse("stock_web:changedefsup", args=[pk])
@@ -4815,6 +4819,62 @@ def newlocation(httprequest):
     )
 
 
+class ListUsers(ListView):
+    model = User
+    template_name = 'stock_web/list_users.html'
+
+    def get_queryset(self):
+        return User.objects.filter(is_staff=False)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(ListUsers, self).get_context_data(**kwargs)
+        groups = Group.objects.all().order_by('name')
+        context["groups"] = groups
+        context["toolbar"] = _toolbar(self.request, active="new")
+        context["header"] = "Manage Role"
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        form = ReviewAdminForm(request.POST)
+        if form.is_valid():
+            group = form.cleaned_data['group']
+            username = form.cleaned_data['username']
+            user = get_object_or_404(User, username=username)
+
+            user.groups.set([group])
+            user.save()
+
+            messages.success(request, f"Successfully changed role for {user.get_full_name() or user.username} to {group.name}.")
+            return HttpResponseRedirect(reverse("stock_web:list_users"))
+
+        context = self.get_context_data(object_list=self.object_list, form=form)
+        messages.error(request, "There was an error processing your request.")
+        return self.render_to_response(context)
+#
+# from django.contrib.auth.models import User
+# from stock_web.models import STAFF
+#
+# users = User.objects.all()
+#
+# for user in users:
+#     try:
+#         user_name = STAFF.objects.get(STAFF_CODE=user.username)
+#         if user_name.NAME and user_name.EMAIL:
+#             fullname = user_name.NAME.split()
+#             if len(fullname) > 1:
+#                 user.first_name = fullname[0]
+#                 user.last_name = fullname[-1]
+#                 user.email = user_name.EMAIL
+#             elif fullname:
+#                 user.first_name = fullname[0]
+#                 user.email = user_name.EMAIL
+#             user.groups.add(Group.objects.get(name="User"))
+#             user.save()
+#     except STAFF.DoesNotExist:
+#         print(f"No STAFF record found for user: {user.username}")
+#         continue
+
+
 def add_admin(request):
     group = get_object_or_404(Group, name="Admin")
-

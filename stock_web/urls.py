@@ -1,4 +1,4 @@
-from django.urls import re_path
+from django.urls import re_path, path
 from . import views
 
 app_name = "stock_web"
@@ -37,7 +37,7 @@ urlpatterns = [
     re_path(r"^finishitem/(.*)/$", views.finishitem, name="finishitem"),
     re_path(r"^loginview/$", views.loginview, name="loginview"),
     re_path(r"^logout_page/$", views.logout_page, name="logout_page"),
-    re_path(r"^change_password/$", views.change_password, name="change_password"),
+    # re_path(r"^change_password/$", views.change_password, name="change_password"),
     re_path(r"^activteam/$", views.activteam, name="activteam"),
     re_path(r"^activsup/$", views.activsup, name="activsup"),
     re_path(r"^toggle_mi/$", views.toggle_mi, name="toggle_mi"),
@@ -53,9 +53,10 @@ urlpatterns = [
     re_path(r"^invreport/(.*)/(.*)/(.*)/(.*)/$", views.invreport, name="invreport"),
     re_path(r"^undoitem/(.*)/(.*)/$", views.undoitem, name="undoitem"),
     re_path(r"^changedate/(.*)/(.*)/$", views.changedate, name="changedate"),
-    re_path(r"^resetpw/$", views.resetpw, name="resetpw"),
+    # re_path(r"^resetpw/$", views.resetpw, name="resetpw"),
     # re_path(r"^forcereset/$", views.forcereset, name="forcereset"),
     re_path(r"^unauth/$", views.unauth, name="unauth"),
     re_path(r"^newroom/$", views.newroom, name="newroom"),
     re_path(r"^newlocation/$", views.newlocation, name="newlocation"),
+    path("users/", views.ListUsers.as_view(), name="list_users")
 ]

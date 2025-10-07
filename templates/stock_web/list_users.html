@@ -1,0 +1,46 @@
+{% extends "stock_web/stock.html" %}
+{% block content %}
+<div class="container-fluid">
+<h4>{{ header }}{% if headerlink.url %}<a href="{{ headerlink.url }}">{% endif %}{{ headerlink.label }}{% if headerlink.url %}</a>{% endif %}</h4>
+    <table class="table table-bordered table-hover table-striped defaultTable">
+        <thead>
+        <tr>
+            <th>Fullname</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Change Role</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for object in object_list %}
+                <tr>                    <td>{{ object.first_name }} {{ object.last_name }}</td>
+                    <td>{{ object.email }}</td>
+                    <td>
+                        {% for group in object.groups.all %}
+                            {{ group.name }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+
+                        {% endfor %}
+                    </td>
+                <td>
+                    <form action="." method="post">
+                    {% csrf_token %}
+                        <input type="hidden" name="username" value="{{ object.username }}">
+                        <select onchange="this.form.submit()"  name="group" id="">
+                            <option>Click to change role</option>
+                            {% for group in groups %}
+                                <option value="{{ group.name }}" >{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+        
+    </table>
+
+</div>
+
+{% endblock %}

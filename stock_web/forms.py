@@ -2,7 +2,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.db.models import F
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django_select2.forms import Select2Widget, ModelSelect2Widget
 from decimal import Decimal
 from bootstrap_daterangepicker import widgets, fields
@@ -1269,5 +1269,8 @@ class NewLocationForm(forms.ModelForm):
                 ),
             )
 
-class AddAdmin(forms.Form):
+class ReviewAdminForm(forms.Form):
     username = forms.CharField(max_length=20, label="Username")
+    group = forms.ModelChoiceField(
+        queryset=Group.objects.all(), to_field_name="name", empty_label=None
+    )
