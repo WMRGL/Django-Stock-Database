@@ -58,11 +58,22 @@ class Command(BaseCommand):
                     )
 
             # --- Handle regular user logic ---
+            elif user.is_superuser:
+                # This user is a superuser but not in the approved list.
+                # Demote them from superuser, but keep them as staff in the Superadmin group.
+                user.is_superuser = False
+                user.is_staff = False
+                user.groups.set([superadmin_group])
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Demoted {user.username} from superuser, but kept in Superadmin group."
+                    )
+                )
             else:
-                if user.is_staff or user.is_superuser or list(user.groups.all()) != [user_group]:
-                    user.is_staff = False
-                    user.is_superuser = False
-                    user.groups.set([user_group])
+                # This is a standard user.
+                user.is_staff = False
+                user.is_superuser = False
+                user.groups.set([user_group])
 
             # --- Sync details from STAFF table for all users ---
             try:
@@ -92,7 +103,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"No STAFF record found for user: {user.username}. Skipping.")
                 skipped_count += 1
                 continue
-
+        
         self.stdout.write(self.style.SUCCESS(f"\nSynchronization complete."))
         self.stdout.write(self.style.SUCCESS(f"Processed {processed_count} users."))
         self.stdout.write(self.style.WARNING(f"Skipped {skipped_count} users (not found in STAFF table)."))
