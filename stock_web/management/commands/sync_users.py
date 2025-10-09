@@ -28,6 +28,7 @@ class Command(BaseCommand):
             # Pre-fetch groups to avoid repeated lookups
             user_group = Group.objects.get(name="User")
             superadmin_group = Group.objects.get(name="Superadmin")
+            admin_group = Group.objects.get(name="Admin")
             lab_admin_group = Group.objects.get(name="Lab admin")
         except Group.DoesNotExist as e:
             raise CommandError(
@@ -61,15 +62,15 @@ class Command(BaseCommand):
             # --- Handle Lab admin migration logic ---
             elif user.groups.filter(name="Lab admin").exists():
                 # Ensure Lab admin users are not staff and are only in the Lab admin group
-                if user.is_staff or user.is_superuser or list(user.groups.all()) != [lab_admin_group]:
-                    user.is_staff = False
-                    user.is_superuser = False
-                    user.groups.set([lab_admin_group])
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            f"Set {user.username} as a non-staff member of the 'Lab admin' group."
-                        )
+                # if user.is_staff or user.is_superuser or list(user.groups.all()) != [lab_admin_group]:
+                user.is_staff = False
+                user.is_superuser = False
+                user.groups.set([admin_group])
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"Set {user.username} as a non-staff member of the 'Lab admin' group."
                     )
+                )
 
             # --- Handle demotion for non-approved superusers ---
             elif user.is_superuser:
