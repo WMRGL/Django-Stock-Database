@@ -29,7 +29,7 @@ from .models import (
     Recipe,
     Inventory,
     Solutions,
-    ForceReset,
+    # ForceReset,
     Emails,
     EmailGroup,
     Comments,
@@ -220,7 +220,7 @@ admin.site.register(Validation, Validation_Admin)
 admin.site.register(Recipe, Recipe_Admin)
 admin.site.register(Inventory, Inventory_Admin)
 admin.site.register(Solutions, Solution_Admin)
-admin.site.register(ForceReset)
+# admin.site.register(ForceReset)
 admin.site.register(Insert, Insert_Admin)
 admin.site.register(Emails, Emails_Admin)
 admin.site.register(Comments, Comments_Admin)

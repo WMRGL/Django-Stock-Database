@@ -33,7 +33,7 @@ from .cyto import ADD_CYTO
 from .email import send, EMAIL
 from .pdf_report import report_gen
 from .models import (
-    ForceReset,
+    # ForceReset,
     Suppliers,
     Teams,
     Reagents,
@@ -4852,7 +4852,7 @@ class ListUsers(ListView):
         messages.error(request, "There was an error processing your request.")
         return self.render_to_response(context)
 #
-# from django.contrib.auth.models import User
+# from django.contrib.auth.models import User, Group
 # from stock_web.models import STAFF
 #
 # users = User.objects.all()

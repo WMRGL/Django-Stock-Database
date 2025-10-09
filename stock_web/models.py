@@ -18,45 +18,45 @@ from .email import send, EMAIL
 # made they will need to change password on first login. Useful as allows accounts
 # to be made by admin with e.g "password" but could be annoying if user is there
 # when acount gets made and sets their own password...
-class ForceReset(models.Model):
-    def __str__(self):
-        return "Toggle Reset for {}".format(self.user)
-
-    class Meta:
-        verbose_name_plural = "Force Password Resets"
-
-    user = models.OneToOneField(User, on_delete=models.PROTECT)
-    force_password_change = models.BooleanField(default=True)
-    emailed = models.BooleanField(default=False)
-
-
-# automatically adds user to ForceReset table upon creation
-# if not done will give errors when trying to do checks
-@receiver(post_save, sender=User)
-def create_profile(sender, instance, created, **kwargs):
-    if created:
-        ForceReset.objects.create(user=instance)
-        EmailGroup.objects.create(user=instance, team=None)
-    if instance.email != "":
-        USER = ForceReset.objects.get(user=instance)
-        if USER.emailed == False:
-            subject = "Stock Database account created"
-            text = "<p>An account on the Stock Database has been created with the following details:<br><br>"
-            text += "Username: {}<br><br>".format(instance.username)
-            text += "Password: stockdb1<br><br>"
-            text += "NOTE - you will be required to change this password when you first log in.<br><br>"
-            if EMAIL == True:
-                try:
-                    send(subject, text, instance.email)
-                    USER.emailed = True
-                    USER.save()
-                except:
-                    print("EMAIL ERROR")
-                    Emails.objects.create(to=instance.email, subj=subject, text=text)
-                    USER.emailed = True
-                    USER.save()
-                    pass
-
+# class ForceReset(models.Model):
+#     def __str__(self):
+#         return "Toggle Reset for {}".format(self.user)
+#
+#     class Meta:
+#         verbose_name_plural = "Force Password Resets"
+#
+#     user = models.OneToOneField(User, on_delete=models.PROTECT)
+#     force_password_change = models.BooleanField(default=True)
+#     emailed = models.BooleanField(default=False)
+#
+#
+# # automatically adds user to ForceReset table upon creation
+# # if not done will give errors when trying to do checks
+# @receiver(post_save, sender=User)
+# def create_profile(sender, instance, created, **kwargs):
+#     if created:
+#         ForceReset.objects.create(user=instance)
+#         EmailGroup.objects.create(user=instance, team=None)
+#     if instance.email != "":
+#         USER = ForceReset.objects.get(user=instance)
+#         if USER.emailed == False:
+#             subject = "Stock Database account created"
+#             text = "<p>An account on the Stock Database has been created with the following details:<br><br>"
+#             text += "Username: {}<br><br>".format(instance.username)
+#             text += "Password: stockdb1<br><br>"
+#             text += "NOTE - you will be required to change this password when you first log in.<br><br>"
+#             if EMAIL == True:
+#                 try:
+#                     send(subject, text, instance.email)
+#                     USER.emailed = True
+#                     USER.save()
+#                 except:
+#                     print("EMAIL ERROR")
+#                     Emails.objects.create(to=instance.email, subj=subject, text=text)
+#                     USER.emailed = True
+#                     USER.save()
+#                     pass
+#
 
 class Room(models.Model):
     room_name = models.CharField(max_length=100, unique=True)
