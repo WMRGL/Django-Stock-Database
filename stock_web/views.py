@@ -4851,29 +4851,6 @@ class ListUsers(ListView):
         context = self.get_context_data(object_list=self.object_list, form=form)
         messages.error(request, "There was an error processing your request.")
         return self.render_to_response(context)
-#
-from django.contrib.auth.models import User, Group
-from stock_web.models import STAFF
-
-users = User.objects.all()
-
-for user in users:
-    try:
-        user_name = STAFF.objects.get(STAFF_CODE=user.username)
-        if user_name.NAME and user_name.EMAIL:
-            fullname = user_name.NAME.split()
-            if len(fullname) > 1:
-                user.first_name = fullname[0]
-                user.last_name = fullname[-1]
-                user.email = user_name.EMAIL
-            elif fullname:
-                user.first_name = fullname[0]
-                user.email = user_name.EMAIL
-            user.groups.add(Group.objects.get(name="User"))
-            user.save()
-    except STAFF.DoesNotExist:
-        print(f"No STAFF record found for user: {user.username}")
-        continue
 
 
 def add_admin(request):
