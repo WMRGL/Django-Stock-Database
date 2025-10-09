@@ -82,9 +82,9 @@ class Command(BaseCommand):
                             user.last_name = ""  # Ensure last_name is cleared if not present
                             self.stdout.write(f"Updated name for user: {user.username}")
 
-                    if user.email != staff_record.EMAIL:
-                        user.email = staff_record.EMAIL
-                        self.stdout.write(f"Updated email for user: {user.username}")
+                    # if user.email != staff_record.EMAIL:
+                    #     user.email = staff_record.EMAIL
+                    #     self.stdout.write(f"Updated email for user: {user.username}")
 
                 user.save()
 
