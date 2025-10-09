@@ -28,6 +28,7 @@ class Command(BaseCommand):
             # Pre-fetch groups to avoid repeated lookups
             user_group = Group.objects.get(name="User")
             superadmin_group = Group.objects.get(name="Superadmin")
+            lab_admin_group = Group.objects.get(name="Lab admin")
         except Group.DoesNotExist as e:
             raise CommandError(
                 f'The "{e.args[0].split()[-1]}" group does not exist. Please create it in the admin panel.'
@@ -57,23 +58,23 @@ class Command(BaseCommand):
                         )
                     )
 
-            # --- Handle regular user logic ---
-            elif user.is_superuser:
-                # This user is a superuser but not in the approved list.
-                # Demote them from superuser, but keep them as staff in the Superadmin group.
-                user.is_superuser = False
+            # --- Handle Lab admin migration logic ---
+            elif user.groups.filter(name="Lab admin").exists():
                 user.is_staff = False
+                user.is_superuser = False
                 user.groups.set([superadmin_group])
                 self.stdout.write(
                     self.style.WARNING(
-                        f"Demoted {user.username} from superuser, but kept in Superadmin group."
+                        f"Moved {user.username} from 'Lab admin' to 'Superadmin' and deactivated staff/superuser status."
                     )
                 )
+
+            # --- Handle regular user logic ---
             else:
-                # This is a standard user.
-                user.is_staff = False
-                user.is_superuser = False
-                user.groups.set([user_group])
+                if user.is_staff or user.is_superuser or list(user.groups.all()) != [user_group]:
+                    user.is_staff = False
+                    user.is_superuser = False
+                    user.groups.set([user_group])
 
             # --- Sync details from STAFF table for all users ---
             try:
@@ -93,9 +94,10 @@ class Command(BaseCommand):
                             user.last_name = ""  # Ensure last_name is cleared if not present
                             self.stdout.write(f"Updated name for user: {user.username}")
 
-                    # if user.email != staff_record.EMAIL:
-                    #     user.email = staff_record.EMAIL
-                    #     self.stdout.write(f"Updated email for user: {user.username}")
+                    if staff_record.EMAIL:
+                        # if user.email != staff_record.EMAIL:
+                        user.email = staff_record.EMAIL
+                        self.stdout.write(f"Updated email for user: {user.username}")
 
                 user.save()
 
@@ -103,7 +105,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"No STAFF record found for user: {user.username}. Skipping.")
                 skipped_count += 1
                 continue
-        
+
         self.stdout.write(self.style.SUCCESS(f"\nSynchronization complete."))
         self.stdout.write(self.style.SUCCESS(f"Processed {processed_count} users."))
         self.stdout.write(self.style.WARNING(f"Skipped {skipped_count} users (not found in STAFF table)."))
