@@ -60,21 +60,34 @@ class Command(BaseCommand):
 
             # --- Handle Lab admin migration logic ---
             elif user.groups.filter(name="Lab admin").exists():
-                user.is_staff = False
+                # Ensure Lab admin users are not staff and are only in the Lab admin group
+                if user.is_staff or user.is_superuser or list(user.groups.all()) != [lab_admin_group]:
+                    user.is_staff = False
+                    user.is_superuser = False
+                    user.groups.set([lab_admin_group])
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"Set {user.username} as a non-staff member of the 'Lab admin' group."
+                        )
+                    )
+
+            # --- Handle demotion for non-approved superusers ---
+            elif user.is_superuser:
                 user.is_superuser = False
+                user.is_staff = False  # Keep them as staff
                 user.groups.set([superadmin_group])
                 self.stdout.write(
                     self.style.WARNING(
-                        f"Moved {user.username} from 'Lab admin' to 'Superadmin' and deactivated staff/superuser status."
+                        f"Demoted {user.username} from superuser, but kept in Superadmin group."
                     )
                 )
 
             # --- Handle regular user logic ---
-            else:
-                if user.is_staff or user.is_superuser or list(user.groups.all()) != [user_group]:
-                    user.is_staff = False
-                    user.is_superuser = False
-                    user.groups.set([user_group])
+            # else:
+            #     if user.is_staff or user.is_superuser or list(user.groups.all()) != [user_group]:
+            #         user.is_staff = False
+            #         user.is_superuser = False
+            #         user.groups.set([user_group])
 
             # --- Sync details from STAFF table for all users ---
             try:
