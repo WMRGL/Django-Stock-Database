@@ -137,13 +137,24 @@ class Command(BaseCommand):
             for model in apps.get_models():
                 for field in model._meta.get_fields():
                     # Handle ForeignKey and OneToOneField
-                    if isinstance(field, (models.ForeignKey, models.OneToOneField)) and field.related_model == User:
+                    if isinstance(field, (models.ForeignKey)) and field.related_model == User:
                         for dup_user in duplicate_users:
                             with transaction.atomic():
                                 related_objects = model.objects.filter(**{field.name: dup_user})
                                 if related_objects.exists():
-                                    updated_count = related_objects.update(**{field.name: primary_user})
-                                    self.stdout.write(f"    - Re-assigned {updated_count} '{model._meta.verbose_name}' records from '{dup_user.username}' to '{primary_user.username}'")
+                                    # Special handling for OneToOneFields to avoid unique constraint violations
+                                    if isinstance(field, models.OneToOneField):
+                                        # If the primary user already has a related object, delete the duplicate's object.
+                                        if hasattr(primary_user, field.remote_field.name):
+                                            deleted_count, _ = related_objects.delete()
+                                            if deleted_count > 0:
+                                                self.stdout.write(f"    - Deleted {deleted_count} '{model._meta.verbose_name}' record(s) from '{dup_user.username}'")
+                                        else:
+                                            updated_count = related_objects.update(**{field.name: primary_user})
+                                            self.stdout.write(f"    - Re-assigned {updated_count} '{model._meta.verbose_name}' record from '{dup_user.username}' to '{primary_user.username}'")
+                                    else: # It's a regular ForeignKey
+                                        updated_count = related_objects.update(**{field.name: primary_user})
+                                        self.stdout.write(f"    - Re-assigned {updated_count} '{model._meta.verbose_name}' records from '{dup_user.username}' to '{primary_user.username}'")
 
                     # Handle ManyToManyField
                     if isinstance(field, models.ManyToManyField) and field.related_model == User:
