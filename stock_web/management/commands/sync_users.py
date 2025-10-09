@@ -68,7 +68,7 @@ class Command(BaseCommand):
             try:
                 staff_record = STAFF.objects.get(STAFF_CODE=user.username)
 
-                if staff_record.NAME and staff_record.EMAIL:
+                if staff_record.NAME:
                     fullname = staff_record.NAME.split()
 
                     if len(fullname) > 1:
