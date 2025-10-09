@@ -44,24 +44,25 @@ class Command(BaseCommand):
 
         for user in users:
             processed_count += 1
-            user_changed = False
+            
             # --- Handle Superadmin logic ---
             if user.username in superadmin_usernames:
-                user.is_staff = True
-                user.is_superuser = True
-                user.groups.set([superadmin_group])
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"Processed {user.username} as a Superadmin."
+                if not user.is_staff or not user.is_superuser or list(user.groups.all()) != [superadmin_group]:
+                    user.is_staff = True
+                    user.is_superuser = True
+                    user.groups.set([superadmin_group])
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"Set {user.username} as a Superadmin."
+                        )
                     )
-                )
-                user_changed = True
+
             # --- Handle regular user logic ---
             else:
-                user.is_staff = False
-                user.is_superuser = False
-                user.groups.set([user_group])
-                user_changed = True
+                if user.is_staff or user.is_superuser or list(user.groups.all()) != [user_group]:
+                    user.is_staff = False
+                    user.is_superuser = False
+                    user.groups.set([user_group])
 
             # --- Sync details from STAFF table for all users ---
             try:
@@ -69,32 +70,23 @@ class Command(BaseCommand):
 
                 if staff_record.NAME and staff_record.EMAIL:
                     fullname = staff_record.NAME.split()
-                    name_changed = False
-                    email_changed = False
 
                     if len(fullname) > 1:
                         if user.first_name != fullname[0] or user.last_name != fullname[-1]:
                             user.first_name = fullname[0]
                             user.last_name = fullname[-1]
-                            name_changed = True
-                            user_changed = True
+                            self.stdout.write(f"Updated name for user: {user.username}")
                     elif fullname:
                         if user.first_name != fullname[0] or user.last_name != "":
                             user.first_name = fullname[0]
                             user.last_name = ""  # Ensure last_name is cleared if not present
-                            name_changed = True
-                            user_changed = True
+                            self.stdout.write(f"Updated name for user: {user.username}")
 
                     if user.email != staff_record.EMAIL:
                         user.email = staff_record.EMAIL
-                        email_changed = True
-                        user_changed = True
+                        self.stdout.write(f"Updated email for user: {user.username}")
 
-                    if user_changed:
-                        user.save()
-                        updated_count += 1
-                        if name_changed or email_changed:
-                            self.stdout.write(f"Synced details for user: {user.username}")
+                user.save()
 
             except STAFF.DoesNotExist:
                 self.stdout.write(f"No STAFF record found for user: {user.username}. Skipping.")
