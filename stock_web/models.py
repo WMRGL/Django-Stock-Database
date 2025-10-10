@@ -130,7 +130,7 @@ class Teams(models.Model):
 
 class Reagents(models.Model):
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.cat_no}"
 
     class Meta:
         verbose_name_plural = "Reagents"

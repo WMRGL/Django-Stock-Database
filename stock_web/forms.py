@@ -46,20 +46,12 @@ class ShowReagentMiChoiceField(forms.ModelChoiceField):
         return obj.show_mi_req()
 
 
+
 class NewInvForm1(forms.ModelForm):
-    class ReagentWidget(ModelSelect2Widget):
-        search_fields = [
-            "name__icontains",
-            "cat_no__icontains",
-        ]
-
-        def label_from_instance(self, obj):
-            return f"{obj.name} ({obj.cat_no})"
-
     reagent = forms.ModelChoiceField(
-        queryset=Reagents.objects.filter(is_active=True).order_by("name"),
-        label="Reagent",
-        widget=ReagentWidget(attrs={"style": "width:25em"}),
+        queryset=Reagents.objects.all().exclude(is_active=False).order_by("name"),
+        label="Catalogue number",
+        widget=Select2Widget,
     )
 
     class Meta:
@@ -69,10 +61,7 @@ class NewInvForm1(forms.ModelForm):
     def clean(self):
         super(NewInvForm1, self).clean()
         errors = []
-        reagent_pk = self.cleaned_data.get("reagent")
-        if not reagent_pk:
-            return
-        item = reagent_pk
+        item = Reagents.objects.get(pk=self.data["reagent"])
         if item.recipe is not None:
             for i in range(1, item.recipe.length() + 1):
                 if (
@@ -1021,7 +1010,7 @@ class StockReportForm(forms.Form):
         queryset=Reagents.objects.filter(count_no__gte=1)
         .exclude(is_active=False, count_no__lt=1)
         .order_by("name"),
-        label="Reagent",
+        label="Catalogue Number",
         widget=Select2Widget,
     )
     rec_range = fields.DateRangeField(
