@@ -619,7 +619,7 @@ class SearchForm(forms.Form):
     reagent = forms.CharField(label="Reagent Name", max_length=30, required=False)
     supplier = forms.CharField(label="Supplier Name", max_length=25, required=False)
     lot_no = forms.CharField(label="Lot Number", max_length=20, required=False)
-    int_id = forms.CharField(label="Stock Number", max_length=4, required=False)
+    int_id = forms.CharField(label="Stock Number", max_length=4, required=False, widget=forms.TextInput(attrs={'style': 'text-transform:uppercase'}))
     team = forms.ModelChoiceField(
         queryset=Teams.objects.all().order_by("name").exclude(name="ALL"),
         label="Team",
@@ -1263,3 +1263,14 @@ class ReviewAdminForm(forms.Form):
     group = forms.ModelChoiceField(
         queryset=Group.objects.all(), to_field_name="name", empty_label=None
     )
+
+class ItemUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Inventory
+        fields = ("location", "room", "team")
+        widgets = {
+            "location": Select2Widget,
+            "room": Select2Widget,
+            "team": Select2Widget,
+        }
+

@@ -1,0 +1,14 @@
+{% extends "stock_web/stock.html" %}
+
+{% block content %}
+    <div class="m-3">
+    <form action="." method="post" >
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    </div>
+
+
+
+{% endblock %}

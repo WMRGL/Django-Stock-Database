@@ -25,7 +25,7 @@ urlpatterns = [
     re_path(r"^uploadreagents/$", views.uploadreagents, name="uploadreagents"),
     re_path(r"^inventory/(.*)/(.*)/(.*)/(.*)/$", views.inventory, name="inventory"),
     re_path(r"^listinv/$", views.listinv, name="listinv"),
-    re_path(r"^item/(.*)/$", views.item, name="item"),
+    path("item/<int:pk>/", views.item, name="item"),
     re_path(r"^confirm_insert/(.*)/$", views.confirm_insert, name="confirm_insert"),
     re_path(r"^add_man_info/(.*)/(.*)/$", views.add_man_info, name="add_man_info"),
     re_path(r"^view_man_info/(.*)/$", views.view_man_info, name="view_man_info"),
@@ -58,5 +58,6 @@ urlpatterns = [
     re_path(r"^unauth/$", views.unauth, name="unauth"),
     re_path(r"^newroom/$", views.newroom, name="newroom"),
     re_path(r"^newlocation/$", views.newlocation, name="newlocation"),
-    path("users/", views.ListUsers.as_view(), name="list_users")
+    path("users/", views.ListUsers.as_view(), name="list_users"),
+    path("item/<int:pk>/update/", views.ItemUpdateView.as_view(), name="item_update")
 ]

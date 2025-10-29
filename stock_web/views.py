@@ -1,4 +1,6 @@
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from django.contrib import messages
@@ -9,7 +11,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User, Group
 from django.db.models import F, Q
 from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.db import transaction
 from django.db.models.functions import Lower
 from django.utils.safestring import mark_safe
@@ -26,7 +28,7 @@ import logging
 import validators
 from decimal import Decimal
 
-from django.views.generic import ListView
+from django.views import generic
 
 from .prime import PRIME
 from .cyto import ADD_CYTO
@@ -92,7 +94,7 @@ from .forms import (
     ChangeFinForm,
     AddCommentForm,
     AddKitInsForm,
-    ConfirmKitInsForm, NewRoomForm, NewLocationForm, ReviewAdminForm,
+    ConfirmKitInsForm, NewRoomForm, NewLocationForm, ReviewAdminForm, ItemUpdateForm
 )
 
 LOGINURL = settings.LOGIN_URL
@@ -368,22 +370,13 @@ def _toolbar(httprequest, active=""):
             }
         )
 
-    # toolbar[1][0].append(
-    #     {
-    #         "name": "Account Settings",
-    #         "glyphicon": "cog",
-    #         "dropdown": [
-    #             {
-    #                 "name": "Logout " + str(httprequest.user),
-    #                 "url": reverse("stock_web:logout_page"),
-    #             },
-    #             {
-    #                 "name": "Change Password",
-    #                 "url": reverse("stock_web:change_password"),
-    #             },
-    #         ],
-    #     }
-    # )
+    toolbar[1][0].append(
+        {
+            "name": "Logout",
+            "glyphicon": "cog",
+            "url": reverse("stock_web:logout_page")
+        }
+    )
 
     for entry in toolbar[0][0]:
         if entry["name"] == active:
@@ -951,6 +944,7 @@ def listinv(httprequest):
     title = "List of Products"
     headings = [
         "Product Name",
+        "Catelogue Number",
         "Number Unopen (Or Volume) In Stock",
         "Number Open In Stock",
         "Minimum Stock Level",
@@ -965,7 +959,8 @@ def listinv(httprequest):
     body = []
     for item in items:
         values = [
-            item.name,
+            item.name ,
+            item.cat_no,
             "{}µl".format(item.count_no)
             if item.track_vol == True
             else int(item.count_no),
@@ -986,6 +981,7 @@ def listinv(httprequest):
                     1,
                 ],
             ),
+            "",
             "",
             "",
             "",
@@ -2056,6 +2052,9 @@ def _item_context(httprequest, item, undo):
         headings += ["Action"]
         values += ["Add Comment"]
         urls += [reverse("stock_web:add_comment", args=[item.id])]
+        headings += ["Action"]
+        values += ["Update Item"]
+        urls += [reverse("stock_web:item_update", args=[item.pk])]
     body = [(zip(values, urls, urls), False)]
     if undo == "undo":
         toolbar = _toolbar(httprequest, active="Edit Data")
@@ -3573,7 +3572,7 @@ def uploadreagents(httprequest):
                 for row in data:
                     try:
                         values = {}
-                        values["name"] = row["Name"]
+                        values["name"] = row["Name"].replace(":", "-")
                         values["cat_no"] = row["Catalogue Number"]
                         values["supplier_def"] = Suppliers.objects.get(
                             name=row["Default Supplier"]
@@ -4819,7 +4818,7 @@ def newlocation(httprequest):
     )
 
 
-class ListUsers(ListView):
+class ListUsers(LoginRequiredMixin, generic.ListView):
     model = User
     template_name = 'stock_web/list_users.html'
 
@@ -4830,7 +4829,7 @@ class ListUsers(ListView):
         context = super(ListUsers, self).get_context_data(**kwargs)
         groups = Group.objects.all().order_by('name')
         context["groups"] = groups
-        context["toolbar"] = _toolbar(self.request, active="new")
+        context["toolbar"] = _toolbar(self.request, active="Update Users")
         context["header"] = "Manage Role"
         return context
 
@@ -4855,3 +4854,17 @@ class ListUsers(ListView):
 
 def add_admin(request):
     group = get_object_or_404(Group, name="Admin")
+
+
+class ItemUpdateView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
+    model = Inventory
+    form_class = ItemUpdateForm
+    template_name = 'stock_web/item_update.html'
+    success_url = reverse_lazy('stock_web:listinv')
+    success_message = "Item Updated Successfully"
+
+    def get_context_data(self, **kwargs):
+        context = super(ItemUpdateView, self).get_context_data(**kwargs)
+        context["toolbar"] = _toolbar(self.request, active="new")
+        context["header"] = "Update Item"
+        return context
