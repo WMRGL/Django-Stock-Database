@@ -36,12 +36,27 @@ class ShireBackend(BaseBackend):
                 # Try to find the user record in the auth_user table
                 user = User.objects.get(username__iexact=username)
             except User.DoesNotExist:
-                # If not found create a new user. There's no need to set a password
+                # If not found create a new user.
                 fullname = user_valid_obj.NAME.split()
+
+                # Prepare user attributes in a dictionary
+                user_kwargs = {
+                    'username': username,
+                    'first_name': '',
+                    'last_name': '',
+                    # 'user_valid_obj.EMAIL or ""' ensures that if the email
+                    # is None or an empty string, it defaults to ""
+                    # which satisfies the NOT NULL database constraint.
+                    'email': user_valid_obj.EMAIL or ''
+                }
+
+                if len(fullname) >= 1:
+                    user_kwargs['first_name'] = fullname[0]
                 if len(fullname) >= 2:
-                    user = User(username=username, first_name=fullname[0], last_name=fullname[-1], email=user_valid_obj.EMAIL)
-                else:
-                    user = User(username=username)
+                    user_kwargs['last_name'] = fullname[-1]
+
+                # Create the user from the keyword arguments
+                user = User(**user_kwargs)
                 user.save()
             return user
 
