@@ -969,7 +969,7 @@ def listinv(httprequest):
             if item.track_vol == True
             else item.min_count,
             item.unit_of_measurement,
-            "Yes" if item.unit_of_measurement else "No",
+            "Yes" if item.standing_order else "No",
         ]
         urls = [
             reverse(
