@@ -3201,7 +3201,7 @@ def newinv(httprequest, pk):
                             reagent=form.cleaned_data["reagent"].id,
                             lot_no=form.cleaned_data["lot_no"],
                         )
-                        if len(items) == int(form.data["num_rec"]):
+                        if len(items) == 1:
                             message += [
                                 "NEW LOT NUMBER, CHECK MANUFACTURER'S INSTRUCTIONS"
                             ]
