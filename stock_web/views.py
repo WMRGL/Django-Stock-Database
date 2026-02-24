@@ -1332,7 +1332,7 @@ def inventory(httprequest, search, what, sortby, page):
             item.supplier.name,
             item.internal.batch_number,
             item.date_rec.strftime("%d/%m/%Y"),
-            item.date_exp.strftime("%d/%m/%Y"),
+            mark_safe(f'<span style="display:none">{item.date_exp.strftime("%Y%m%d")}</span>{item.date_exp.strftime("%d/%m/%Y")}'),
             item.date_op.strftime("%d/%m/%Y") if item.date_op is not None else "",
             item.val.val_date.strftime("%d/%m/%Y") if item.val_id is not None else "",
             item.date_fin.strftime("%d/%m/%Y") if item.date_fin is not None else "",
