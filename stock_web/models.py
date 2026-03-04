@@ -801,14 +801,23 @@ class Inventory(models.Model):
             if int(reagent.count_no) == 0:
                 open_items = Inventory.objects.filter(
                     is_op=True, finished=False, reagent=reagent
-                ).count()
+                )
                 un_open_items = Inventory.objects.filter(
                     is_op=False, finished=False, reagent=reagent
-                ).count()
-                reagent.open_no = open_items
-                reagent.count_no = un_open_items
+                )
+
+                reagent.open_no = open_items.count()
+
+                if reagent.track_vol:
+                    new_vol = sum((i.current_vol or 0) for i in open_items) + sum(
+                        (i.vol_rec or 0) for i in un_open_items)
+                    reagent.count_no = new_vol
+                else:
+                    reagent.count_no = un_open_items.count()
+
                 reagent.save()
                 reagent.refresh_from_db()
+
             if reagent.track_vol == False:
                 reagent.count_no = F("count_no") - 1
             reagent.open_no = F("open_no") + 1
@@ -821,7 +830,7 @@ class Inventory(models.Model):
 
     @classmethod
     def take_out(
-        cls, vol, item, user, reason=None, date=datetime.datetime.now().date(), sol=None
+            cls, vol, item, user, reason=None, date=datetime.datetime.now().date(), sol=None
     ):
         with transaction.atomic():
             if reason == "":
@@ -842,9 +851,7 @@ class Inventory(models.Model):
                 un_open_items = Inventory.objects.filter(
                     is_op=False, finished=False, reagent=reagent
                 )
-                new_vol = 0
-                for inv_item in open_items:
-                    new_vol += inv_item.current_vol
+                new_vol = sum((i.current_vol or 0) for i in open_items) + sum((i.vol_rec or 0) for i in un_open_items)
                 reagent.count_no = new_vol
                 reagent.save()
             VolUsage.use(
@@ -867,28 +874,8 @@ class Inventory(models.Model):
             invitem.fin_text = values["fin_text"]
             invitem.date_fin = values["date_fin"]
             invitem.finished = True
-            reagent = Inventory.objects.get(id=item).reagent
-            open_items = Inventory.objects.filter(
-                is_op=True, finished=False, reagent=reagent
-            ).count()
-            un_open_items = Inventory.objects.filter(
-                is_op=False, finished=False, reagent=reagent
-            ).count()
-            reagent.open_no = open_items
-            reagent.count_no = un_open_items
-            reagent.save()
-            reagent.refresh_from_db()
-            if reagent.track_vol == False and invitem.is_op == False:
-                reagent.count_no = F("count_no") - 1
-                invitem.save()
-                reagent.save()
 
-            elif reagent.track_vol == False and invitem.is_op == True:
-                reagent.open_no = F("open_no") - 1
-                reagent.save()
-                invitem.save()
-
-            elif reagent.track_vol == True:
+            if invitem.reagent.track_vol:
                 if invitem.current_vol != 0:
                     use = VolUsage.use(
                         item,
@@ -900,16 +887,27 @@ class Inventory(models.Model):
                         values["date_fin"],
                     )
                     invitem.last_usage = use
-                if "vol" in values.keys():
-                    reagent.count_no = F("count_no") - values["vol"]
-                else:
-                    reagent.count_no = F("count_no") - invitem.current_vol
-                if invitem.is_op == True:
-                    reagent.open_no = F("open_no") - 1
-                reagent.save()
                 invitem.current_vol = 0
-                invitem.save()
 
+            invitem.save()
+
+            reagent = invitem.reagent
+            open_items = Inventory.objects.filter(
+                is_op=True, finished=False, reagent=reagent
+            )
+            un_open_items = Inventory.objects.filter(
+                is_op=False, finished=False, reagent=reagent
+            )
+
+            reagent.open_no = open_items.count()
+
+            if reagent.track_vol:
+                new_vol = sum((i.current_vol or 0) for i in open_items) + sum((i.vol_rec or 0) for i in un_open_items)
+                reagent.count_no = new_vol
+            else:
+                reagent.count_no = un_open_items.count()
+
+            reagent.save()
 
 class VolUsage(models.Model):
     class Meta:
