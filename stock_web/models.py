@@ -613,9 +613,12 @@ class Insert(models.Model):
 
 class Inventory(models.Model):
     def __str__(self):
-        return "{}, Lot:{}, Stock Number:{}".format(
-            self.reagent.name, self.lot_no, self.internal
-        )
+        try:
+            internal_ref = self.internal
+        except Internal.DoesNotExist:
+            internal_ref = "Deleted Batch"
+
+        return f"{self.reagent.name}, {self.lot_no}, {internal_ref}"
 
     class Meta:
         verbose_name_plural = "Inventory Items"
