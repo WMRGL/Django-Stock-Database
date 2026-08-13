@@ -1950,14 +1950,15 @@ def _item_context(httprequest, item, undo):
         title_url.append("")
     title = zip(title, title_url)
     if item.sol is not None:
-        headings = ["Date Created", "Created By", "Condition Received", "Expiry Date"]
+        headings = ["Date Created", "Created By", "Condition Received", "Expiry Date", "Location"]
     else:
-        headings = ["Date Received", "Received By", "Condition Received", "Expiry Date"]
+        headings = ["Date Received", "Received By", "Condition Received", "Expiry Date", "Location"]
     values = [
         item.date_rec,
         item.rec_user.username,
         CONDITIONS[item.cond_rec],
         item.date_exp,
+        item.location,
     ]
     if undo == "undo":
         urls = [
