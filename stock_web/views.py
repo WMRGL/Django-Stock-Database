@@ -4487,6 +4487,20 @@ def undoitem(httprequest, task, pk):
                                 if item.reagent.track_vol == False:
                                     item.reagent.count_no = F("count_no") + 1
                                     item.reagent.save()
+                                # item.save()
+                                else:
+                                    finish_use = item.last_usage
+                                    if (
+                                            finish_use is not None
+                                            and item.current_vol == 0
+                                    ):
+                                        item.reagent.count_no = F(
+                                            "count_no"
+                                        ) + finish_use.used
+                                        item.reagent.save()
+                                        item.current_vol = finish_use.start
+                                        item.last_usage = None
+                                        finish_use.delete()
                                 item.save()
                             elif task == "unopen":
                                 sols = Solutions.objects.filter(
