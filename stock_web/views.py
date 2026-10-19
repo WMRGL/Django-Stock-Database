@@ -1185,6 +1185,7 @@ def inventory(httprequest, search, what, sortby, page):
         "Catalogue Number",
         "Supplier",
         "Stock Number",
+        "Location",
         "Date Received",
         "Expiry Date",
         "Date Opened",
@@ -1331,6 +1332,7 @@ def inventory(httprequest, search, what, sortby, page):
             item.reagent.cat_no if item.reagent.cat_no is not None else "",
             item.supplier.name,
             item.internal.batch_number,
+            item.location,
             item.date_rec.strftime("%d/%m/%Y"),
             mark_safe(f'<span style="display:none">{item.date_exp.strftime("%Y%m%d")}</span>{item.date_exp.strftime("%d/%m/%Y")}'),
             item.date_op.strftime("%d/%m/%Y") if item.date_op is not None else "",
@@ -1950,14 +1952,15 @@ def _item_context(httprequest, item, undo):
         title_url.append("")
     title = zip(title, title_url)
     if item.sol is not None:
-        headings = ["Date Created", "Created By", "Condition Received", "Expiry Date", "Location"]
+        headings = ["Date Created", "Created By", "Condition Received", "Expiry Date", "Room", "Location"]
     else:
-        headings = ["Date Received", "Received By", "Condition Received", "Expiry Date", "Location"]
+        headings = ["Date Received", "Received By", "Condition Received", "Expiry Date",  "Room", "Location"]
     values = [
         item.date_rec,
         item.rec_user.username,
         CONDITIONS[item.cond_rec],
         item.date_exp,
+        item.room,
         item.location,
     ]
     if undo == "undo":
