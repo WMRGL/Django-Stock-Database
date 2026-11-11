@@ -1969,9 +1969,11 @@ def _item_context(httprequest, item, undo):
             "",
             "",
             reverse("stock_web:changedate", args=[item.pk, "exp"]),
+            "",
+            "",
         ]
     else:
-        urls = ["", "", "", ""]
+        urls = ["", "", "", "", "", ""]
     SKIP = False
     if item.date_op is not None:
         headings += ["Date Opened", "Opened By"]
